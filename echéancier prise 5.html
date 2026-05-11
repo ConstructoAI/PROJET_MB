@@ -1,0 +1,3912 @@
+<!DOCTYPE html>
+<html lang="fr-CA">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suivi multi-chantiers — Constructo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700;12..96,800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F4EFE6;
+    --paper-2: #ECE5D8;
+    --ink: #1A1A1A;
+    --ink-2: #4A4A4A;
+    --ink-3: #8A8278;
+    --rule-soft: #C9C0B0;
+    --accent: #C2410C;
+    --accent-2: #7C2D12;
+    --steel: #1F3A4D;
+    --moss: #4A5D3A;
+    --ochre: #B8860B;
+    --teal: #1F665C;
+    --crimson: #8B2635;
+    --green-ok: #2D6A4F;
+    --shadow: rgba(26, 26, 26, 0.08);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background-image:
+      radial-gradient(ellipse at top left, rgba(194, 65, 12, 0.04), transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(31, 58, 77, 0.05), transparent 50%);
+    min-height: 100vh;
+    padding: 28px 22px 80px;
+  }
+  .sheet { max-width: 1340px; margin: 0 auto; }
+
+  .masthead {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    border-bottom: 3px solid var(--ink);
+    padding-bottom: 18px;
+    margin-bottom: 20px;
+  }
+  .brand-mark {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand-mark::before { content: ''; width: 28px; height: 1px; background: var(--accent); }
+  .doc-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 44px;
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .doc-title em { font-style: italic; font-weight: 400; color: var(--accent); }
+  .doc-subtitle { font-size: 14px; color: var(--ink-2); max-width: 600px; }
+  .doc-meta {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-2);
+    line-height: 1.7;
+  }
+  .doc-meta strong { color: var(--ink); font-weight: 600; }
+
+  .project-bar {
+    background: #FFF;
+    border: 1px solid var(--rule-soft);
+    border-left: 6px solid var(--accent);
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: center;
+    box-shadow: 0 2px 8px var(--shadow);
+  }
+  .project-bar-info { min-width: 0; }
+  .project-bar-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 4px;
+  }
+  .project-selector-wrap {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .project-select {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    padding: 6px 36px 6px 12px;
+    border: 1px solid var(--rule-soft);
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%231A1A1A' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    min-width: 240px;
+    max-width: 100%;
+  }
+  .project-select:focus { outline: none; border-color: var(--accent); }
+  .project-color-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--paper);
+    padding: 5px 10px;
+    font-weight: 600;
+  }
+  .project-bar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .project-meta-strip {
+    grid-column: 1 / -1;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed var(--rule-soft);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    font-size: 12px;
+  }
+  .project-meta-strip .meta-item strong {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .project-meta-strip .meta-item span {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 22px;
+    border-bottom: 2px solid var(--ink);
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 11px 18px;
+    background: transparent;
+    border: none;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink-3);
+    cursor: pointer;
+    transition: all 0.2s;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .tab:hover { color: var(--ink); }
+  .tab.active { color: var(--ink); border-bottom-color: var(--accent); }
+  .tab-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    background: var(--paper-2);
+    padding: 2px 6px;
+    color: var(--ink-2);
+  }
+  .tab.active .tab-num { background: var(--accent); color: var(--paper); }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .section-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: baseline;
+    gap: 16px;
+    margin: 28px 0 16px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--ink);
+  }
+  .section-header:first-child { margin-top: 0; }
+  .section-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .section-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .section-title em { font-style: italic; font-weight: 400; color: var(--ink-2); }
+  .section-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .section-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 7px 13px;
+    border: 1px solid var(--ink);
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .btn:hover { background: var(--ink); color: var(--paper); }
+  .btn-primary { background: var(--ink); color: var(--paper); }
+  .btn-primary:hover { background: var(--accent); border-color: var(--accent); }
+  .btn-accent { background: var(--accent); color: var(--paper); border-color: var(--accent); }
+  .btn-accent:hover { background: var(--accent-2); border-color: var(--accent-2); }
+  .btn-sm { padding: 4px 10px; font-size: 11px; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .stat-card {
+    background: #FFF;
+    border: 1px solid var(--rule-soft);
+    padding: 12px 16px;
+    border-top: 3px solid var(--accent);
+  }
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 4px;
+  }
+  .stat-value {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .stat-value small {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--ink-2);
+    font-weight: 400;
+  }
+  .stat-progress {
+    height: 4px;
+    background: var(--paper-2);
+    margin-top: 8px;
+    overflow: hidden;
+  }
+  .stat-progress-fill {
+    height: 100%;
+    background: var(--green-ok);
+    transition: width 0.4s;
+  }
+
+  .tasks-table {
+    background: #FFF;
+    border: 1px solid var(--rule-soft);
+    box-shadow: 0 2px 10px var(--shadow);
+    overflow-x: auto;
+  }
+  .tasks-table table { width: 100%; border-collapse: collapse; min-width: 920px; }
+  .tasks-table thead { background: var(--ink); color: var(--paper); }
+  .tasks-table th {
+    text-align: left;
+    padding: 10px 12px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+    border-right: 1px solid rgba(244, 239, 230, 0.15);
+  }
+  .tasks-table th:last-child { border-right: none; }
+  .tasks-table tbody tr { border-bottom: 1px solid #F0EAE0; }
+  .tasks-table tbody tr:hover { background: rgba(194, 65, 12, 0.03); }
+  .tasks-table tbody tr.done { background: rgba(45, 106, 79, 0.05); }
+  .tasks-table tbody tr.done .task-name { text-decoration: line-through; color: var(--ink-3); }
+  .tasks-table td { padding: 9px 12px; vertical-align: middle; font-size: 12.5px; }
+
+  .task-phase-tag {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    padding: 2px 7px;
+    color: var(--paper);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  .task-phase-tag.terr { background: var(--moss); }
+  .task-phase-tag.struct { background: var(--ochre); }
+  .task-phase-tag.env { background: var(--teal); }
+  .task-phase-tag.meca { background: var(--steel); }
+  .task-phase-tag.iso { background: var(--accent-2); }
+  .task-phase-tag.fin { background: var(--accent); }
+  .task-phase-tag.ext { background: var(--crimson); }
+  .task-phase-tag.livr { background: var(--ink); }
+
+  .task-name { font-weight: 500; color: var(--ink); }
+  .task-dates {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--ink-2);
+    white-space: nowrap;
+  }
+
+  .status-select {
+    border: none;
+    padding: 4px 22px 4px 8px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    text-transform: uppercase;
+    color: #fff;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='5' viewBox='0 0 8 5'%3E%3Cpath fill='%23fff' d='M0 0l4 5 4-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    min-width: 110px;
+  }
+
+  .row-actions {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+  }
+  .row-action-btn {
+    background: transparent;
+    border: 1px solid var(--rule-soft);
+    width: 26px;
+    height: 26px;
+    cursor: pointer;
+    color: var(--ink-2);
+    font-size: 13px;
+    padding: 0;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .row-action-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(194,65,12,0.05);
+  }
+  .row-action-btn.del:hover {
+    border-color: var(--crimson);
+    color: var(--crimson);
+    background: rgba(139,38,53,0.05);
+  }
+
+  .assignment-cell { min-width: 220px; }
+  .assignment-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    align-items: center;
+  }
+  .assigned-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--paper-2);
+    border: 1px solid var(--rule-soft);
+    padding: 3px 6px 3px 8px;
+    font-size: 11px;
+    border-radius: 2px;
+  }
+  .assigned-chip.charp {
+    background: rgba(184, 134, 11, 0.1);
+    border-color: var(--ochre);
+  }
+  .assigned-chip.sub {
+    background: rgba(31, 58, 77, 0.08);
+    border-color: var(--steel);
+  }
+  .assigned-chip .remove-x {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0 2px;
+    color: var(--ink-3);
+    font-size: 13px;
+    line-height: 1;
+  }
+  .assigned-chip .remove-x:hover { color: var(--accent); }
+  .add-assign-btn {
+    background: transparent;
+    border: 1px dashed var(--rule-soft);
+    color: var(--ink-3);
+    padding: 3px 8px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .add-assign-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    border-style: solid;
+  }
+  .section-row td {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 6px 12px !important;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .section-row .section-label { flex: 1; }
+  .section-row .section-edit {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.3);
+    color: var(--paper);
+    padding: 2px 8px;
+    font-size: 10px;
+    cursor: pointer;
+    margin-left: 12px;
+  }
+  .section-row .section-edit:hover { background: rgba(255,255,255,0.15); }
+
+  .proj-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 2px 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    color: var(--paper);
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+  .proj-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+  }
+
+  .contacts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .contact-card {
+    background: #FFF;
+    border: 1px solid var(--rule-soft);
+    border-left: 4px solid var(--accent);
+    padding: 14px 16px;
+    box-shadow: 0 1px 3px var(--shadow);
+    position: relative;
+  }
+  .contact-card.charp { border-left-color: var(--ochre); }
+  .contact-card.sub { border-left-color: var(--steel); }
+  .contact-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6px;
+    gap: 8px;
+    padding-right: 30px;
+  }
+  .contact-name {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .contact-role {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-top: 3px;
+  }
+  .contact-company { font-size: 12px; color: var(--ink-2); margin-bottom: 6px; }
+  .contact-actions { display: flex; gap: 6px; margin-top: 10px; }
+  .contact-edit {
+    position: absolute;
+    top: 10px; right: 10px;
+    background: transparent;
+    border: 1px solid var(--rule-soft);
+    cursor: pointer;
+    color: var(--ink-2);
+    font-size: 12px;
+    padding: 3px 7px;
+    transition: all 0.15s;
+  }
+  .contact-edit:hover { border-color: var(--accent); color: var(--accent); }
+  .contact-phone {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .calendar-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .month-nav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .month-btn {
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    width: 32px; height: 32px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 700;
+    transition: all 0.15s;
+  }
+  .month-btn:hover { background: var(--ink); color: var(--paper); }
+  .month-jump {
+    background: var(--paper);
+    border: 1px solid var(--rule-soft);
+    padding: 6px 10px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    color: var(--ink);
+  }
+  .month-today-btn {
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    padding: 6px 14px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .month-today-btn:hover { background: var(--ink); color: var(--paper); }
+  .month-label {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    text-transform: capitalize;
+    min-width: 200px;
+    text-align: center;
+  }
+  .filter-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .filter-chip {
+    background: var(--paper);
+    border: 1px solid var(--rule-soft);
+    padding: 4px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .filter-chip.active {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .project-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 16px;
+    padding: 10px 14px;
+    background: var(--paper-2);
+    border: 1px solid var(--rule-soft);
+    margin-bottom: 14px;
+    font-size: 11px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; }
+  .legend-dot {
+    width: 12px; height: 12px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .cal-wrap {
+    background: #FFF;
+    border: 1px solid var(--rule-soft);
+    box-shadow: 0 2px 10px var(--shadow);
+    overflow: hidden;
+  }
+  .cal-dayheader {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .cal-dayheader .dh {
+    padding: 9px 8px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    font-weight: 600;
+    border-right: 1px solid rgba(244, 239, 230, 0.12);
+  }
+  .cal-dayheader .dh:last-child { border-right: none; }
+  .cal-dayheader .dh.weekend { color: var(--ochre); }
+
+  .cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    grid-auto-rows: minmax(120px, auto);
+  }
+  .cal-cell {
+    border-right: 1px solid #F0EAE0;
+    border-bottom: 1px solid #F0EAE0;
+    padding: 6px 6px 4px;
+    background: var(--paper);
+    cursor: pointer;
+    transition: background 0.15s;
+    display: flex;
+    flex-direction: column;
+    min-height: 120px;
+    position: relative;
+  }
+  .cal-cell:nth-child(7n) { border-right: none; }
+  .cal-cell:hover { background: rgba(194, 65, 12, 0.04); }
+  .cal-cell.outside { background: #FAF6EC; color: var(--ink-3); }
+  .cal-cell.outside .cal-day-num { color: var(--ink-3); opacity: 0.5; }
+  .cal-cell.weekend { background: rgba(184, 134, 11, 0.04); }
+  .cal-cell.outside.weekend { background: #F7F3E7; }
+  .cal-cell.today { background: rgba(194, 65, 12, 0.08); }
+  .cal-cell.today .cal-day-num {
+    background: var(--accent);
+    color: var(--paper);
+    width: 24px; height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+  .cal-day-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 4px;
+    line-height: 1;
+  }
+  .cal-day-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    overflow: hidden;
+  }
+  .cal-entry {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 5px;
+    background: var(--paper-2);
+    border-left: 3px solid var(--accent);
+    font-size: 10.5px;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-radius: 2px;
+  }
+  .cal-entry.charp { background: rgba(184, 134, 11, 0.08); }
+  .cal-entry .entry-name {
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+  }
+  .cal-entry.done { opacity: 0.5; text-decoration: line-through; }
+  .cal-more {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9.5px;
+    color: var(--ink-2);
+    padding: 1px 5px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+  }
+  .cal-more:hover { color: var(--accent); }
+
+  .day-detail-section { margin-bottom: 16px; }
+  .day-detail-section h4 {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .day-detail-entry {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px dashed var(--rule-soft);
+  }
+  .day-detail-entry:last-child { border-bottom: none; }
+  .day-detail-entry .dpe-info { min-width: 0; }
+  .day-detail-entry .dpe-name {
+    font-weight: 700;
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+  .day-detail-entry .dpe-task {
+    font-size: 11.5px;
+    color: var(--ink-2);
+    line-height: 1.3;
+  }
+
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 26, 26, 0.6);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .modal-backdrop.show { display: flex; }
+  .modal {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    max-width: 520px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+  .modal-header {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .modal-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+  }
+  .modal-close {
+    background: transparent;
+    border: none;
+    color: var(--paper);
+    font-size: 22px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 4px;
+  }
+  .modal-body { padding: 20px; }
+  .modal-footer {
+    padding: 14px 20px;
+    border-top: 1px solid var(--rule-soft);
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+  .form-group { margin-bottom: 14px; }
+  .form-group label {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 4px;
+  }
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1px solid var(--rule-soft);
+    background: var(--paper);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .color-picker {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 6px;
+  }
+  .color-swatch {
+    width: 100%;
+    aspect-ratio: 1;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .color-swatch.selected {
+    border-color: var(--ink);
+    transform: scale(1.1);
+  }
+  .project-links {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: #FFF;
+    border: 1px solid var(--rule-soft);
+    padding: 10px;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .project-link-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .project-link-row:hover { background: var(--paper-2); }
+  .project-link-row input[type="checkbox"] {
+    width: 16px; height: 16px;
+    cursor: pointer;
+  }
+  .project-link-row .pcolor {
+    width: 14px; height: 14px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .project-link-row .pname {
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .picker-list {
+    max-height: 360px;
+    overflow-y: auto;
+    border: 1px solid var(--rule-soft);
+    background: #FFF;
+  }
+  .picker-section-title {
+    background: var(--paper-2);
+    padding: 8px 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-2);
+    font-weight: 600;
+    border-bottom: 1px solid var(--rule-soft);
+  }
+  .picker-item {
+    padding: 9px 14px;
+    border-bottom: 1px solid #F0EAE0;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.15s;
+    gap: 10px;
+  }
+  .picker-item:hover { background: var(--paper-2); }
+  .picker-item.assigned { opacity: 0.5; cursor: not-allowed; }
+  .picker-item-info { flex: 1; min-width: 0; }
+  .picker-item-name {
+    font-weight: 600;
+    font-size: 13px;
+    margin-bottom: 2px;
+  }
+  .picker-item-role {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-3);
+    letter-spacing: 0.05em;
+  }
+  .picker-empty {
+    padding: 30px 20px;
+    text-align: center;
+    color: var(--ink-3);
+    font-size: 13px;
+  }
+  .contact-sheet {
+    background: var(--paper);
+    border: 2px solid var(--ink);
+    max-width: 360px;
+    width: 100%;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  }
+  .contact-sheet-header {
+    padding: 18px 20px;
+    border-bottom: 1px solid var(--rule-soft);
+    text-align: center;
+  }
+  .contact-sheet-name {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .contact-sheet-role {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .contact-sheet-phone {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 16px;
+    color: var(--accent);
+    font-weight: 600;
+    margin-top: 8px;
+  }
+  .contact-sheet-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--rule-soft);
+  }
+  .contact-action-btn {
+    background: var(--paper);
+    border: none;
+    padding: 18px;
+    cursor: pointer;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink);
+    transition: background 0.15s;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .contact-action-btn:hover { background: var(--paper-2); }
+  .contact-action-btn .ico { font-size: 22px; line-height: 1; }
+  .contact-action-btn.call .ico { color: var(--green-ok); }
+  .contact-action-btn.sms .ico { color: var(--steel); }
+
+  .status-row {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto auto;
+    gap: 8px;
+    align-items: center;
+    padding: 8px;
+    border: 1px solid var(--rule-soft);
+    background: #FFF;
+    margin-bottom: 6px;
+  }
+  .status-row input[type="color"] {
+    width: 36px;
+    height: 32px;
+    border: 1px solid var(--rule-soft);
+    cursor: pointer;
+    padding: 0;
+  }
+  .status-row input[type="text"] {
+    padding: 6px 10px;
+    border: 1px solid var(--rule-soft);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+  }
+  .done-tag {
+    grid-column: 1 / -1;
+    font-size: 10px;
+    color: var(--green-ok);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(100px);
+    background: var(--ink);
+    color: var(--paper);
+    padding: 12px 20px;
+    font-size: 13px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    z-index: 200;
+    transition: transform 0.25s;
+    font-weight: 500;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+  .empty-state {
+    padding: 50px 30px;
+    text-align: center;
+    color: var(--ink-2);
+    background: var(--paper-2);
+    border: 1px dashed var(--rule-soft);
+    grid-column: 1 / -1;
+  }
+  .empty-state .es-title {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+  .empty-state .es-text {
+    font-size: 13.5px;
+    margin-bottom: 16px;
+    max-width: 420px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .doc-footer {
+    margin-top: 36px;
+    padding-top: 16px;
+    border-top: 2px solid var(--ink);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--ink-3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 900px) {
+    body { padding: 14px 10px; }
+    .doc-title { font-size: 30px; }
+    .stats-bar { grid-template-columns: 1fr 1fr; }
+    .project-meta-strip { grid-template-columns: 1fr 1fr; }
+    .masthead { grid-template-columns: 1fr; }
+    .doc-meta { text-align: left; margin-top: 12px; }
+    .form-row { grid-template-columns: 1fr; }
+    .color-picker { grid-template-columns: repeat(6, 1fr); }
+    .cal-cell { min-height: 80px; }
+    .cal-entry { font-size: 9.5px; padding: 1px 3px; }
+    .project-bar { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <header class="masthead">
+    <div>
+      <div class="brand-mark">Suivi multi-chantiers · Outil entrepreneur général</div>
+      <h1 class="doc-title">Tableau <em>de bord</em></h1>
+      <p class="doc-subtitle">Gestion centralisée de tes projets, sous-traitants et équipe de charpentiers.</p>
+    </div>
+    <div class="doc-meta">
+      <div>Aujourd'hui · <strong id="todayDate">—</strong></div>
+      <div>Données · <strong>Sauvegarde locale</strong></div>
+    </div>
+  </header>
+
+  <div class="project-bar" id="projectBar">
+    <div class="project-bar-info">
+      <div class="project-bar-label">Projet actif</div>
+      <div class="project-selector-wrap">
+        <select class="project-select" id="projectSelect"></select>
+        <span class="project-color-pill" id="projectColorPill" style="background:var(--accent)">●  —</span>
+      </div>
+    </div>
+    <div class="project-bar-actions">
+      <button class="btn btn-sm" id="btnEditProject" type="button">✎ Modifier</button>
+      <button class="btn btn-accent btn-sm" id="btnAddProject" type="button">+ Nouveau projet</button>
+    </div>
+    <div class="project-meta-strip" id="projectMeta"></div>
+  </div>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="suivi" type="button"><span class="tab-num">01</span>Suivi des tâches</button>
+    <button class="tab" data-tab="calendar" type="button"><span class="tab-num">02</span>Calendrier mensuel</button>
+    <button class="tab" data-tab="charpentiers" type="button"><span class="tab-num">03</span>Mon équipe</button>
+    <button class="tab" data-tab="soustraitants" type="button"><span class="tab-num">04</span>Sous-traitants</button>
+  </nav>
+
+  <div class="panel active" id="panel-suivi">
+    <div class="stats-bar" id="statsBar"></div>
+    <div class="section-header">
+      <span class="section-num">§ 01</span>
+      <h2 class="section-title">Tâches du chantier <em>— assignations &amp; statut</em></h2>
+      <div class="section-actions">
+        <button class="btn btn-accent btn-sm" id="btnAddTask" type="button">+ Tâche</button>
+        <button class="btn btn-sm" id="btnAddSection" type="button">+ Section</button>
+        <button class="btn btn-sm" id="btnLoadTemplate" type="button">⚡ Modèle</button>
+        <button class="btn btn-sm" id="btnManagePhases" type="button">🏷 Phases</button>
+        <button class="btn btn-sm" id="btnManageStatuses" type="button">⚙ Statuts</button>
+        <button class="btn btn-sm" id="btnExportCsv" type="button">↓ CSV</button>
+        <button class="btn btn-sm" id="btnBackup" type="button">💾 Sauvegarde</button>
+        <button class="btn btn-sm" id="btnResetTasks" type="button">⟲ Reset</button>
+      </div>
+    </div>
+    <div class="tasks-table">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:130px;">Statut</th>
+            <th style="width:110px;">Phase</th>
+            <th>Tâche</th>
+            <th style="width:170px;">Période</th>
+            <th>Assignés</th>
+            <th style="width:80px;">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="tasksBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-calendar">
+    <div class="section-header">
+      <span class="section-num">§ 02</span>
+      <h2 class="section-title">Calendrier mensuel <em>— qui travaille où</em></h2>
+      <div class="section-actions">
+        <button class="btn btn-sm" id="btnPrintCalendar" type="button">🖨 PDF</button>
+      </div>
+    </div>
+
+    <div class="calendar-controls">
+      <div class="month-nav">
+        <button class="month-btn" id="prevMonth" type="button">‹</button>
+        <div class="month-label" id="monthLabel">—</div>
+        <button class="month-btn" id="nextMonth" type="button">›</button>
+        <select class="month-jump" id="monthJump"></select>
+        <select class="month-jump" id="yearJump"></select>
+        <button class="month-today-btn" id="todayBtn" type="button">Aujourd'hui</button>
+      </div>
+      <div class="filter-chips">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:0.1em; color:var(--ink-3); margin-right:6px;">FILTRE :</span>
+        <button class="filter-chip active" data-filter="all" type="button">Tous</button>
+        <button class="filter-chip" data-filter="charp" type="button">Mon équipe</button>
+        <button class="filter-chip" data-filter="sub" type="button">Sous-traitants</button>
+      </div>
+    </div>
+
+    <div class="project-legend" id="projectLegend"></div>
+
+    <div class="cal-wrap">
+      <div class="cal-dayheader">
+        <div class="dh weekend">Dim</div>
+        <div class="dh">Lun</div>
+        <div class="dh">Mar</div>
+        <div class="dh">Mer</div>
+        <div class="dh">Jeu</div>
+        <div class="dh">Ven</div>
+        <div class="dh weekend">Sam</div>
+      </div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="panel-charpentiers">
+    <div class="section-header">
+      <span class="section-num">§ 03</span>
+      <h2 class="section-title">Mon équipe de charpentiers <em>— ressources permanentes</em></h2>
+      <div class="section-actions">
+        <button class="btn btn-accent btn-sm" id="btnAddCharp" type="button">+ Ajouter charpentier</button>
+      </div>
+    </div>
+    <div class="contacts-grid" id="charpGrid"></div>
+  </div>
+
+  <div class="panel" id="panel-soustraitants">
+    <div class="section-header">
+      <span class="section-num">§ 04</span>
+      <h2 class="section-title">Sous-traitants <em>— par corps de métier</em></h2>
+      <div class="section-actions">
+        <button class="btn btn-accent btn-sm" id="btnAddSub" type="button">+ Ajouter sous-traitant</button>
+      </div>
+    </div>
+    <div class="filter-chips" id="subFilterChips" style="margin-bottom:14px;"></div>
+    <div class="contacts-grid" id="subsGrid"></div>
+  </div>
+
+  <footer class="doc-footer">
+    <div>Suivi multi-chantiers · Données sauvegardées localement</div>
+    <div>Constructo AI</div>
+  </footer>
+
+</div>
+
+<!-- MODAL : PROJET -->
+<div class="modal-backdrop" id="projectModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="projectModalTitle">Nouveau projet</div>
+      <button class="modal-close" data-close="projectModal" type="button">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label>Nom du projet</label><input type="text" id="projName" placeholder="Ex. Résidence Tremblay"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Code dossier</label><input type="text" id="projCode" placeholder="Ex. 2026-014"></div>
+        <div class="form-group"><label>Localisation</label><input type="text" id="projLocation" placeholder="Ex. Granby"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Date de début</label><input type="date" id="projStart"></div>
+        <div class="form-group"><label>Date de fin estimée</label><input type="date" id="projEnd"></div>
+      </div>
+      <div class="form-group"><label>Couleur du projet</label><div class="color-picker" id="colorPicker"></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" id="projDelete" type="button" style="margin-right:auto; color:var(--crimson); border-color:var(--crimson);">Supprimer</button>
+      <button class="btn btn-sm" data-close="projectModal" type="button">Annuler</button>
+      <button class="btn btn-primary btn-sm" id="projSave" type="button">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL : TÂCHE -->
+<div class="modal-backdrop" id="taskModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="taskModalTitle">Nouvelle tâche</div>
+      <button class="modal-close" data-close="taskModal" type="button">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label>Nom de la tâche</label><input type="text" id="taskName" placeholder="Ex. Excavation"></div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Phase</label>
+          <select id="taskPhase">
+            <option value="terr">Terrassement</option>
+            <option value="struct">Structure</option>
+            <option value="env">Enveloppe</option>
+            <option value="meca">Mécanique</option>
+            <option value="iso">Isolation</option>
+            <option value="fin">Finition</option>
+            <option value="ext">Extérieur</option>
+            <option value="livr">Livraison</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Section</label><select id="taskSection"></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Date de début</label><input type="date" id="taskStartDate"></div>
+        <div class="form-group"><label>Date de fin</label><input type="date" id="taskEndDate"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" id="taskDelete" type="button" style="margin-right:auto; color:var(--crimson); border-color:var(--crimson);">Supprimer</button>
+      <button class="btn btn-sm" data-close="taskModal" type="button">Annuler</button>
+      <button class="btn btn-primary btn-sm" id="taskSave" type="button">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL : SECTION -->
+<div class="modal-backdrop" id="sectionModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="sectionModalTitle">Nouvelle section</div>
+      <button class="modal-close" data-close="sectionModal" type="button">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label>Nom de la section</label><input type="text" id="sectionName" placeholder="Ex. Préparation chantier"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" id="sectionDelete" type="button" style="margin-right:auto; color:var(--crimson); border-color:var(--crimson);">Supprimer</button>
+      <button class="btn btn-sm" data-close="sectionModal" type="button">Annuler</button>
+      <button class="btn btn-primary btn-sm" id="sectionSave" type="button">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL : PHASES -->
+<div class="modal-backdrop" id="phaseModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Gérer les phases</div>
+      <button class="modal-close" data-close="phaseModal" type="button">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:12.5px; color:var(--ink-2); margin-bottom:14px;">
+        Personnalise les phases (catégories de tâches) de ce projet. Tu peux changer leur nom, leur couleur, ou ajouter les tiennes (ex. « Démolition », « Plans », etc.).
+      </div>
+      <div id="phaseList" style="margin-bottom:14px;"></div>
+      <button class="btn btn-sm" id="btnAddPhase" type="button">+ Ajouter une phase</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" id="btnResetPhases" type="button" style="margin-right:auto;">Restaurer par défaut</button>
+      <button class="btn btn-sm" data-close="phaseModal" type="button">Annuler</button>
+      <button class="btn btn-primary btn-sm" id="phaseSave" type="button">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL : STATUTS -->
+<div class="modal-backdrop" id="statusModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Gérer les statuts</div>
+      <button class="modal-close" data-close="statusModal" type="button">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:12.5px; color:var(--ink-2); margin-bottom:14px;">
+        Personnalise les statuts pour ce projet. Le <strong>dernier statut</strong> de la liste est considéré comme « complété » (les tâches sont alors barrées).
+      </div>
+      <div id="statusList" style="margin-bottom:14px;"></div>
+      <button class="btn btn-sm" id="btnAddStatus" type="button">+ Ajouter un statut</button>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" id="btnResetStatuses" type="button" style="margin-right:auto;">Restaurer par défaut</button>
+      <button class="btn btn-sm" data-close="statusModal" type="button">Annuler</button>
+      <button class="btn btn-primary btn-sm" id="statusSave" type="button">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL : ASSIGNATION -->
+<div class="modal-backdrop" id="pickerModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Assigner à la tâche</div>
+      <button class="modal-close" data-close="pickerModal" type="button">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:12.5px; color:var(--ink-2); margin-bottom:12px;" id="pickerTaskName"></div>
+      <div class="picker-list" id="pickerList"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" data-close="pickerModal" type="button">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL : CONTACT -->
+<div class="modal-backdrop" id="contactModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="contactModalTitle">Modifier contact</div>
+      <button class="modal-close" data-close="contactModal" type="button">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group"><label>Nom complet</label><input type="text" id="contactName" placeholder="Ex. Jean Tremblay"></div>
+      <div class="form-group"><label>Rôle / Spécialité</label><input type="text" id="contactRole" placeholder="Ex. Charpentier senior"></div>
+      <div class="form-group" id="contactCompanyGroup"><label>Entreprise</label><input type="text" id="contactCompany" placeholder="Ex. Excavation ABC inc."></div>
+      <div class="form-group"><label>Téléphone</label><input type="tel" id="contactPhone" placeholder="Ex. 450-555-0123"></div>
+      <div class="form-group" id="contactProjectsGroup"><label>Projets associés</label><div class="project-links" id="contactProjectLinks"></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" id="contactDelete" type="button" style="margin-right:auto; color:var(--crimson); border-color:var(--crimson);">Supprimer</button>
+      <button class="btn btn-sm" data-close="contactModal" type="button">Annuler</button>
+      <button class="btn btn-primary btn-sm" id="contactSave" type="button">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL : SAUVEGARDE -->
+<div class="modal-backdrop" id="backupModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Sauvegarde &amp; partage</div>
+      <button class="modal-close" data-close="backupModal" type="button">×</button>
+    </div>
+    <div class="modal-body">
+      <div style="font-size:13px; color:var(--ink-2); margin-bottom:18px; line-height:1.6;">
+        Sauvegarde toutes tes données (projets, équipe, sous-traitants, assignations) dans un fichier que tu peux <strong style="color:var(--ink);">partager via iCloud, iMessage ou email</strong>. Ton contact peut ensuite l'importer dans son propre outil.
+      </div>
+
+      <div style="background:var(--paper-2); padding:16px; margin-bottom:16px; border-left:3px solid var(--accent);">
+        <div style="font-family:'Bricolage Grotesque',sans-serif; font-size:14px; font-weight:700; margin-bottom:8px;">📤 Exporter mes données</div>
+        <div style="font-size:12px; color:var(--ink-2); margin-bottom:10px;">Télécharge un fichier <code>.json</code> contenant tout. Tu peux ensuite le partager.</div>
+        <button class="btn btn-accent btn-sm" id="btnDoExport" type="button">⬇ Télécharger la sauvegarde</button>
+      </div>
+
+      <div style="background:var(--paper-2); padding:16px; border-left:3px solid var(--steel);">
+        <div style="font-family:'Bricolage Grotesque',sans-serif; font-size:14px; font-weight:700; margin-bottom:8px;">📥 Importer une sauvegarde</div>
+        <div style="font-size:12px; color:var(--ink-2); margin-bottom:10px;">Charge un fichier <code>.json</code> reçu de ton contact. <strong style="color:var(--crimson);">Attention :</strong> ça remplace toutes tes données actuelles.</div>
+        <input type="file" id="importFile" accept=".json,application/json" style="font-size:12px; margin-bottom:10px; width:100%;">
+        <button class="btn btn-sm" id="btnDoImport" type="button">↑ Importer ce fichier</button>
+      </div>
+
+      <div style="margin-top:16px; padding:12px 14px; background:#fff; border:1px dashed var(--rule-soft); font-size:11.5px; color:var(--ink-2); line-height:1.5;">
+        <strong style="color:var(--ink);">💡 Comment partager avec ton contact :</strong><br>
+        1. Clique « Télécharger la sauvegarde »<br>
+        2. Le fichier va dans <em>Téléchargements</em> ou <em>Fichiers</em><br>
+        3. Touche <em>Partager</em> → <em>iMessage</em> ou <em>iCloud Drive</em><br>
+        4. Ton contact ouvre Claude.ai sur son iPhone, ouvre cet outil et utilise « Importer ce fichier »
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" data-close="backupModal" type="button">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL : APPEL -->
+<div class="modal-backdrop" id="callModal">
+  <div class="contact-sheet">
+    <div class="contact-sheet-header">
+      <div class="contact-sheet-name" id="callName"></div>
+      <div class="contact-sheet-role" id="callRole"></div>
+      <div class="contact-sheet-phone" id="callPhone"></div>
+    </div>
+    <div class="contact-sheet-actions">
+      <a href="#" class="contact-action-btn call" id="callBtnCall"><span class="ico">📞</span><span>Appeler</span></a>
+      <a href="#" class="contact-action-btn sms" id="callBtnSms"><span class="ico">💬</span><span>SMS</span></a>
+    </div>
+    <div style="padding:12px; text-align:center; border-top:1px solid var(--rule-soft);">
+      <button class="btn btn-sm" data-close="callModal" type="button">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL : DÉTAIL JOUR -->
+<div class="modal-backdrop" id="dayModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="dayModalTitle">Affectations du jour</div>
+      <button class="modal-close" data-close="dayModal" type="button">×</button>
+    </div>
+    <div class="modal-body" id="dayModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-sm" data-close="dayModal" type="button">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+'use strict';
+
+// ============================================================
+// CONSTANTES
+// ============================================================
+var STORAGE_KEY = 'constructo_v6';
+
+var PROJECT_COLORS = [
+  '#C2410C', '#1F3A4D', '#4A5D3A', '#8B2635',
+  '#B8860B', '#1F665C', '#6B2D5C', '#7C2D12',
+  '#2D5A3D', '#1E3A5F', '#B45309', '#475569',
+  '#3F6048', '#7F1D3A', '#1E40AF', '#A16207'
+];
+
+var DEFAULT_PHASES = [
+  { id: 'terr', label: 'Terrassement', color: '#4A5D3A' },
+  { id: 'struct', label: 'Structure', color: '#B8860B' },
+  { id: 'env', label: 'Enveloppe', color: '#1F665C' },
+  { id: 'meca', label: 'Mécanique', color: '#1F3A4D' },
+  { id: 'iso', label: 'Isolation', color: '#7C2D12' },
+  { id: 'fin', label: 'Finition', color: '#C2410C' },
+  { id: 'ext', label: 'Extérieur', color: '#8B2635' },
+  { id: 'livr', label: 'Livraison', color: '#1A1A1A' }
+];
+
+// Conservé pour rétrocompatibilité, mais on utilise maintenant les phases du projet
+var PHASES = {
+  terr: 'Terrassement', struct: 'Structure', env: 'Enveloppe', meca: 'Mécanique',
+  iso: 'Isolation', fin: 'Finition', ext: 'Extérieur', livr: 'Livraison'
+};
+
+var DEFAULT_STATUSES = [
+  { id: 'todo', label: 'À faire', color: '#8A8278' },
+  { id: 'doing', label: 'En cours', color: '#1F3A4D' },
+  { id: 'done', label: 'Complété', color: '#2D6A4F' }
+];
+
+// Modèle pré-rempli : sections + tâches avec semaines relatives à la date de début du projet
+var TEMPLATE_SECTIONS = [
+  { name: 'Terrassement & fondation', tasks: [
+    { name: 'Excavation & nivellement', phase: 'terr', startWeek: 1, endWeek: 2 },
+    { name: 'Semelles & coffrage', phase: 'terr', startWeek: 2, endWeek: 2 },
+    { name: 'Murs de fondation coulés', phase: 'terr', startWeek: 3, endWeek: 3 },
+    { name: 'Imperméabilisation & drain français', phase: 'terr', startWeek: 4, endWeek: 4 },
+    { name: 'Remblayage & dalle béton sous-sol', phase: 'terr', startWeek: 4, endWeek: 4 }
+  ]},
+  { name: 'Structure & charpente bois', tasks: [
+    { name: 'Plancher RDC (solives + sous-plancher)', phase: 'struct', startWeek: 5, endWeek: 5 },
+    { name: 'Murs RDC + charpente garage', phase: 'struct', startWeek: 5, endWeek: 6 },
+    { name: 'Plancher étage + murs étage', phase: 'struct', startWeek: 6, endWeek: 7 },
+    { name: 'Charpente toiture + voligeage', phase: 'struct', startWeek: 7, endWeek: 8 }
+  ]},
+  { name: 'Enveloppe extérieure', tasks: [
+    { name: 'Couverture (membrane + bardeaux)', phase: 'env', startWeek: 8, endWeek: 9 },
+    { name: 'Pose portes & fenêtres', phase: 'env', startWeek: 9, endWeek: 10 },
+    { name: 'Membrane pare-air + soffites', phase: 'env', startWeek: 10, endWeek: 11 }
+  ]},
+  { name: 'Mécanique brute', tasks: [
+    { name: 'Plomberie brute (rough-in)', phase: 'meca', startWeek: 10, endWeek: 12 },
+    { name: 'Électricité brute (filage)', phase: 'meca', startWeek: 11, endWeek: 13 },
+    { name: 'Ventilation/HVAC brute', phase: 'meca', startWeek: 12, endWeek: 13 }
+  ]},
+  { name: 'Isolation & gypse', tasks: [
+    { name: 'Isolation + pare-vapeur', phase: 'iso', startWeek: 14, endWeek: 15 },
+    { name: 'Gypse, joints & sablage', phase: 'iso', startWeek: 15, endWeek: 17 }
+  ]},
+  { name: 'Finition intérieure', tasks: [
+    { name: 'Apprêt + 1ʳᵉ couche peinture', phase: 'fin', startWeek: 17, endWeek: 18 },
+    { name: 'Pose céramique', phase: 'fin', startWeek: 18, endWeek: 19 },
+    { name: 'Armoires de cuisine + comptoirs', phase: 'fin', startWeek: 19, endWeek: 20 },
+    { name: 'Plancher bois + escalier', phase: 'fin', startWeek: 20, endWeek: 21 },
+    { name: 'Peinture finale + portes intérieures', phase: 'fin', startWeek: 21, endWeek: 22 },
+    { name: 'Mécanique finale (luminaires, robinets)', phase: 'fin', startWeek: 22, endWeek: 23 }
+  ]},
+  { name: 'Extérieur & aménagement', tasks: [
+    { name: 'Revêtement extérieur', phase: 'ext', startWeek: 16, endWeek: 19 },
+    { name: 'Galerie, balcon & marches', phase: 'ext', startWeek: 20, endWeek: 21 },
+    { name: 'Aménagement paysager & pavage', phase: 'ext', startWeek: 22, endWeek: 24 }
+  ]},
+  { name: 'Livraison', tasks: [
+    { name: 'Nettoyage final + inspection RBQ', phase: 'livr', startWeek: 25, endWeek: 26 },
+    { name: 'Visite pré-livraison + remise des clés', phase: 'livr', startWeek: 26, endWeek: 26 }
+  ]}
+];
+
+// Génère sections + tâches à partir du modèle, en calculant les dates depuis la date de début du projet
+function generateTemplateContent(projectStartDate) {
+  var sections = [];
+  var tasks = [];
+  var startBase = projectStartDate ? new Date(projectStartDate + 'T00:00:00') : new Date();
+
+  TEMPLATE_SECTIONS.forEach(function(sec) {
+    var secId = generateId('sec');
+    sections.push({ id: secId, name: sec.name });
+    sec.tasks.forEach(function(t) {
+      var startD = new Date(startBase.getTime() + (t.startWeek - 1) * 7 * 86400000);
+      var endD = new Date(startBase.getTime() + (t.endWeek * 7 - 1) * 86400000);
+      tasks.push({
+        id: generateId('t'),
+        sectionId: secId,
+        name: t.name,
+        phase: t.phase,
+        startDate: formatDateKey(startD),
+        endDate: formatDateKey(endD),
+        statusId: 'todo',
+        assigned: []
+      });
+    });
+  });
+
+  return { sections: sections, tasks: tasks };
+}
+
+var MONTHS_FR = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+
+// ============================================================
+// STATE
+// ============================================================
+// Structure simplifiée :
+// state.projects[].sections : [{ id, name }]
+// state.projects[].tasks : [{ id, sectionId, name, phase, startDate, endDate, statusId, assigned: [] }]
+// state.projects[].statuses : [{ id, label, color }]
+
+var state = {
+  projects: [],
+  activeProjectId: null,
+  charpentiers: [],
+  subs: []
+};
+
+var calMonth = new Date();
+calMonth.setDate(1);
+var calFilter = 'all';
+var subFilter = 'all';
+var editingProjectId = null;
+var editingProjectColor = PROJECT_COLORS[0];
+var editingContact = null;
+var editingTaskId = null;
+var editingSectionId = null;
+var currentPickerTaskId = null;
+var editingStatuses = [];
+
+// ============================================================
+// HELPERS DOM
+// ============================================================
+function $(id) { return document.getElementById(id); }
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/[&<>"']/g, function(c) {
+    return { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c];
+  });
+}
+
+function cleanPhone(p) { return (p || '').replace(/[^\d+]/g, ''); }
+
+function generateId(prefix) {
+  return prefix + '_' + Date.now() + '_' + Math.floor(Math.random() * 10000);
+}
+
+function showToast(msg) {
+  var t = $('toast');
+  if (!t) return;
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2200);
+}
+
+function showModal(id) { var el = $(id); if (el) el.classList.add('show'); }
+function hideModal(id) { var el = $(id); if (el) el.classList.remove('show'); }
+
+// ============================================================
+// HELPERS DATA
+// ============================================================
+function getActiveProject() {
+  for (var i = 0; i < state.projects.length; i++) {
+    if (state.projects[i].id === state.activeProjectId) return state.projects[i];
+  }
+  return null;
+}
+
+function getProjectStatuses(proj) {
+  var p = proj || getActiveProject();
+  if (!p || !p.statuses || !p.statuses.length) return DEFAULT_STATUSES;
+  return p.statuses;
+}
+
+function getStatusById(statusId, proj) {
+  var statuses = getProjectStatuses(proj);
+  for (var i = 0; i < statuses.length; i++) {
+    if (statuses[i].id === statusId) return statuses[i];
+  }
+  return statuses[0];
+}
+
+function isCompletedStatus(statusId, proj) {
+  var statuses = getProjectStatuses(proj);
+  return statuses.length > 0 && statuses[statuses.length - 1].id === statusId;
+}
+
+// Phases du projet actif (avec fallback sur défauts)
+function getProjectPhases(proj) {
+  var p = proj || getActiveProject();
+  if (!p || !p.phases || !p.phases.length) return DEFAULT_PHASES;
+  return p.phases;
+}
+
+function getPhaseById(phaseId, proj) {
+  var phases = getProjectPhases(proj);
+  for (var i = 0; i < phases.length; i++) {
+    if (phases[i].id === phaseId) return phases[i];
+  }
+  // fallback sur la première phase
+  return phases[0];
+}
+
+// Réordonner un tableau : déplacer un élément d'un index à un autre
+function moveItem(arr, fromIdx, toIdx) {
+  if (fromIdx < 0 || fromIdx >= arr.length || toIdx < 0 || toIdx >= arr.length) return;
+  var item = arr.splice(fromIdx, 1)[0];
+  arr.splice(toIdx, 0, item);
+}
+
+function findPerson(id) {
+  for (var i = 0; i < state.charpentiers.length; i++) {
+    if (state.charpentiers[i].id === id) return state.charpentiers[i];
+  }
+  for (var j = 0; j < state.subs.length; j++) {
+    if (state.subs[j].id === id) return state.subs[j];
+  }
+  return null;
+}
+
+function isCharp(id) {
+  for (var i = 0; i < state.charpentiers.length; i++) {
+    if (state.charpentiers[i].id === id) return true;
+  }
+  return false;
+}
+
+function getDisplayLabel(person, isCharpFlag) {
+  if (!person) return '';
+  // Sous-traitant : entreprise prioritaire
+  if (!isCharpFlag && person.company && person.company.trim()) return person.company;
+  return person.name;
+}
+
+function formatDate(iso) {
+  if (!iso) return '';
+  try {
+    var d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString('fr-CA', { day: '2-digit', month: 'short', year: 'numeric' });
+  } catch (e) { return iso; }
+}
+
+function formatDateShort(iso) {
+  if (!iso) return '';
+  try {
+    var d = new Date(iso + 'T00:00:00');
+    return d.toLocaleDateString('fr-CA', { day: 'numeric', month: 'short' });
+  } catch (e) { return iso; }
+}
+
+function formatDateKey(d) {
+  var y = d.getFullYear();
+  var m = String(d.getMonth() + 1).padStart(2, '0');
+  var day = String(d.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
+}
+
+function isSameDay(a, b) {
+  return a.getFullYear() === b.getFullYear() &&
+         a.getMonth() === b.getMonth() &&
+         a.getDate() === b.getDate();
+}
+
+function shortName(fullName) {
+  var parts = (fullName || '').trim().split(/\s+/);
+  if (parts.length === 0) return '';
+  if (parts.length === 1) return parts[0];
+  return parts[0] + ' ' + parts[parts.length - 1].charAt(0) + '.';
+}
+
+// ============================================================
+// PERSISTENCE
+// ============================================================
+async function loadState() {
+  try {
+    if (typeof window.storage === 'undefined' || !window.storage) {
+      console.warn('window.storage indisponible');
+      return;
+    }
+    var r = await window.storage.get(STORAGE_KEY);
+    if (r && r.value) {
+      var parsed = JSON.parse(r.value);
+      if (parsed && typeof parsed === 'object') {
+        state.projects = Array.isArray(parsed.projects) ? parsed.projects : [];
+        state.activeProjectId = parsed.activeProjectId || null;
+        state.charpentiers = Array.isArray(parsed.charpentiers) ? parsed.charpentiers : [];
+        state.subs = Array.isArray(parsed.subs) ? parsed.subs : [];
+
+        // Validation des projets
+        state.projects.forEach(function(p) {
+          if (!Array.isArray(p.sections)) p.sections = [];
+          if (!Array.isArray(p.tasks)) p.tasks = [];
+          if (!Array.isArray(p.statuses) || p.statuses.length === 0) {
+            p.statuses = JSON.parse(JSON.stringify(DEFAULT_STATUSES));
+          }
+          if (!Array.isArray(p.phases) || p.phases.length === 0) {
+            p.phases = JSON.parse(JSON.stringify(DEFAULT_PHASES));
+          }
+        });
+
+        if (state.projects.length > 0 && !state.activeProjectId) {
+          state.activeProjectId = state.projects[0].id;
+        }
+      }
+    }
+  } catch (e) {
+    console.log('Pas de données précédentes :', e);
+  }
+}
+
+async function saveState() {
+  try {
+    if (typeof window.storage === 'undefined' || !window.storage) return;
+    await window.storage.set(STORAGE_KEY, JSON.stringify(state));
+  } catch (e) {
+    console.error('Erreur sauvegarde:', e);
+  }
+}
+
+// ============================================================
+// PROJECT BAR
+// ============================================================
+function renderProjectBar() {
+  var select = $('projectSelect');
+  var pill = $('projectColorPill');
+  var meta = $('projectMeta');
+  var bar = $('projectBar');
+
+  if (!select) return;
+  select.innerHTML = '';
+
+  if (state.projects.length === 0) {
+    var opt = document.createElement('option');
+    opt.textContent = '— Aucun projet —';
+    opt.value = '';
+    select.appendChild(opt);
+    if (meta) meta.innerHTML = '';
+    if (pill) {
+      pill.style.background = 'var(--accent)';
+      pill.textContent = '● —';
+    }
+    if (bar) bar.style.borderLeftColor = 'var(--accent)';
+    return;
+  }
+
+  state.projects.forEach(function(p) {
+    var o = document.createElement('option');
+    o.value = p.id;
+    o.textContent = p.name;
+    if (p.id === state.activeProjectId) o.selected = true;
+    select.appendChild(o);
+  });
+
+  var proj = getActiveProject();
+  if (!proj) return;
+
+  if (bar) bar.style.borderLeftColor = proj.color;
+  if (pill) {
+    pill.style.background = proj.color;
+    pill.textContent = '● ' + (proj.code || 'PROJET');
+  }
+  if (meta) {
+    meta.innerHTML =
+      '<div class="meta-item"><strong>Code dossier</strong><span>' + escapeHtml(proj.code || '—') + '</span></div>' +
+      '<div class="meta-item"><strong>Localisation</strong><span>' + escapeHtml(proj.location || '—') + '</span></div>' +
+      '<div class="meta-item"><strong>Début</strong><span>' + (formatDate(proj.startDate) || '—') + '</span></div>' +
+      '<div class="meta-item"><strong>Fin estimée</strong><span>' + (formatDate(proj.endDate) || '—') + '</span></div>';
+  }
+}
+
+// ============================================================
+// PROJECT MODAL
+// ============================================================
+function renderColorPicker() {
+  var wrap = $('colorPicker');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+  PROJECT_COLORS.forEach(function(c) {
+    var sw = document.createElement('button');
+    sw.type = 'button';
+    sw.className = 'color-swatch' + (c === editingProjectColor ? ' selected' : '');
+    sw.style.background = c;
+    sw.dataset.color = c;
+    sw.addEventListener('click', function() {
+      editingProjectColor = c;
+      wrap.querySelectorAll('.color-swatch').forEach(function(s) { s.classList.remove('selected'); });
+      sw.classList.add('selected');
+    });
+    wrap.appendChild(sw);
+  });
+}
+
+function openProjectModal(projectId) {
+  editingProjectId = projectId;
+  var isNew = !projectId;
+  var p = null;
+  if (projectId) {
+    for (var i = 0; i < state.projects.length; i++) {
+      if (state.projects[i].id === projectId) { p = state.projects[i]; break; }
+    }
+  }
+
+  $('projectModalTitle').textContent = isNew ? 'Nouveau projet' : 'Modifier le projet';
+  $('projName').value = p ? p.name : '';
+  $('projCode').value = p ? (p.code || '') : '';
+  $('projLocation').value = p ? (p.location || '') : '';
+  $('projStart').value = p ? (p.startDate || '') : '';
+  $('projEnd').value = p ? (p.endDate || '') : '';
+
+  if (isNew) {
+    var used = {};
+    state.projects.forEach(function(x) { used[x.color] = true; });
+    var free = null;
+    for (var k = 0; k < PROJECT_COLORS.length; k++) {
+      if (!used[PROJECT_COLORS[k]]) { free = PROJECT_COLORS[k]; break; }
+    }
+    editingProjectColor = free || PROJECT_COLORS[0];
+  } else {
+    editingProjectColor = p.color;
+  }
+
+  $('projDelete').style.display = isNew ? 'none' : 'inline-flex';
+  renderColorPicker();
+  showModal('projectModal');
+  setTimeout(function() { $('projName').focus(); }, 50);
+}
+
+async function saveProject() {
+  var name = $('projName').value.trim();
+  if (!name) { showToast('Le nom est requis'); return; }
+
+  var data = {
+    name: name,
+    code: $('projCode').value.trim(),
+    location: $('projLocation').value.trim(),
+    startDate: $('projStart').value,
+    endDate: $('projEnd').value,
+    color: editingProjectColor
+  };
+
+  if (editingProjectId) {
+    for (var i = 0; i < state.projects.length; i++) {
+      if (state.projects[i].id === editingProjectId) {
+        Object.keys(data).forEach(function(k) { state.projects[i][k] = data[k]; });
+        break;
+      }
+    }
+  } else {
+    var id = generateId('p');
+    var newProj = { id: id };
+    Object.keys(data).forEach(function(k) { newProj[k] = data[k]; });
+    // Pré-remplir avec le modèle de tâches
+    var template = generateTemplateContent(data.startDate);
+    newProj.sections = template.sections;
+    newProj.tasks = template.tasks;
+    newProj.statuses = JSON.parse(JSON.stringify(DEFAULT_STATUSES));
+    newProj.phases = JSON.parse(JSON.stringify(DEFAULT_PHASES));
+    state.projects.push(newProj);
+    state.activeProjectId = id;
+  }
+
+  await saveState();
+  hideModal('projectModal');
+  showToast(editingProjectId ? 'Projet mis à jour' : 'Projet créé');
+  renderAll();
+}
+
+async function deleteProject() {
+  if (!editingProjectId) return;
+  if (!confirm('Supprimer ce projet ? Toutes ses tâches seront effacées.')) return;
+
+  state.projects = state.projects.filter(function(p) { return p.id !== editingProjectId; });
+  state.subs.forEach(function(s) {
+    if (s.projectIds) s.projectIds = s.projectIds.filter(function(pid) { return pid !== editingProjectId; });
+  });
+
+  if (state.activeProjectId === editingProjectId) {
+    state.activeProjectId = state.projects.length > 0 ? state.projects[0].id : null;
+  }
+
+  await saveState();
+  hideModal('projectModal');
+  showToast('Projet supprimé');
+  renderAll();
+}
+
+// ============================================================
+// TASKS RENDER
+// ============================================================
+function renderTasks() {
+  var body = $('tasksBody');
+  if (!body) return;
+  body.innerHTML = '';
+
+  if (!state.activeProjectId) {
+    var emptyTr = document.createElement('tr');
+    var td = document.createElement('td');
+    td.colSpan = 6;
+    td.style.padding = '0';
+    td.innerHTML = '<div class="empty-state">' +
+      '<div class="es-title">Bienvenue 👋</div>' +
+      '<div class="es-text">Pour commencer, crée ton premier projet de chantier en cliquant sur le bouton ci-dessous.</div>' +
+      '<button class="btn btn-accent" id="welcomeAddProject" type="button" style="font-size:14px; padding:10px 20px;">+ Créer mon premier projet</button>' +
+      '</div>';
+    emptyTr.appendChild(td);
+    body.appendChild(emptyTr);
+    var wb = $('welcomeAddProject');
+    if (wb) wb.addEventListener('click', function() { openProjectModal(null); });
+    return;
+  }
+
+  var proj = getActiveProject();
+  if (!proj) return;
+
+  var statuses = getProjectStatuses(proj);
+
+  if ((!proj.sections || proj.sections.length === 0) && (!proj.tasks || proj.tasks.length === 0)) {
+    var startTr = document.createElement('tr');
+    var startTd = document.createElement('td');
+    startTd.colSpan = 6;
+    startTd.style.padding = '0';
+    startTd.innerHTML = '<div class="empty-state">' +
+      '<div class="es-title">Projet vide</div>' +
+      '<div class="es-text">Charge le modèle pré-rempli (8 sections, 28 tâches) ou commence à zéro avec tes propres sections et tâches.</div>' +
+      '<div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">' +
+        '<button class="btn btn-accent" id="emptyLoadTemplate" type="button" style="font-size:14px; padding:10px 20px;">⚡ Charger le modèle</button>' +
+        '<button class="btn btn-sm" id="emptyAddSection" type="button">+ Section vide</button>' +
+        '<button class="btn btn-sm" id="emptyAddTask" type="button">+ Tâche vide</button>' +
+      '</div>' +
+      '</div>';
+    startTr.appendChild(startTd);
+    body.appendChild(startTr);
+    var blt = $('emptyLoadTemplate'); if (blt) blt.addEventListener('click', loadTemplateIntoProject);
+    var bs = $('emptyAddSection'); if (bs) bs.addEventListener('click', function() { openSectionModal(null); });
+    var bt = $('emptyAddTask'); if (bt) bt.addEventListener('click', function() { openTaskModal(null); });
+    return;
+  }
+
+  // Construire la liste organisée : sections + leurs tâches + tâches sans section à la fin
+  var sectionMap = {};
+  proj.sections.forEach(function(s) { sectionMap[s.id] = []; });
+  var noSection = [];
+  proj.tasks.forEach(function(t) {
+    if (t.sectionId && sectionMap[t.sectionId]) sectionMap[t.sectionId].push(t);
+    else noSection.push(t);
+  });
+
+  proj.sections.forEach(function(section, sectionIdx) {
+    renderSectionRow(body, section, sectionIdx, proj.sections.length);
+    var tasksOfSection = sectionMap[section.id];
+    tasksOfSection.forEach(function(t, taskIdx) {
+      renderTaskRow(body, t, statuses, taskIdx, tasksOfSection.length);
+    });
+  });
+  if (noSection.length > 0) {
+    if (proj.sections.length > 0) renderSectionRow(body, { id: '_none', name: 'Sans section' }, -1, 0);
+    noSection.forEach(function(t, taskIdx) {
+      renderTaskRow(body, t, statuses, taskIdx, noSection.length);
+    });
+  }
+}
+
+function renderSectionRow(body, section, sectionIndex, totalSections) {
+  var tr = document.createElement('tr');
+  tr.className = 'section-row';
+  var td = document.createElement('td');
+  td.colSpan = 6;
+  td.style.cssText = 'background:var(--ink); color:var(--paper); padding:6px 12px;';
+  var inner = document.createElement('div');
+  inner.style.cssText = 'display:flex; align-items:center; justify-content:space-between; font-family:JetBrains Mono,monospace; font-size:10px; letter-spacing:0.15em; text-transform:uppercase; font-weight:600;';
+  var label = document.createElement('span');
+  label.textContent = section.name;
+  inner.appendChild(label);
+  if (section.id !== '_none') {
+    var actions = document.createElement('div');
+    actions.style.cssText = 'display:flex; gap:6px;';
+
+    // Up/Down section
+    var upBtn = document.createElement('button');
+    upBtn.type = 'button';
+    upBtn.style.cssText = 'background:transparent; border:1px solid rgba(255,255,255,0.3); color:#fff; padding:2px 8px; font-size:11px; cursor:pointer; line-height:1;';
+    upBtn.textContent = '↑';
+    upBtn.title = 'Monter la section';
+    upBtn.disabled = sectionIndex === 0;
+    upBtn.style.opacity = sectionIndex === 0 ? '0.3' : '1';
+    upBtn.addEventListener('click', function() { moveSectionUp(section.id); });
+    actions.appendChild(upBtn);
+
+    var downBtn = document.createElement('button');
+    downBtn.type = 'button';
+    downBtn.style.cssText = 'background:transparent; border:1px solid rgba(255,255,255,0.3); color:#fff; padding:2px 8px; font-size:11px; cursor:pointer; line-height:1;';
+    downBtn.textContent = '↓';
+    downBtn.title = 'Descendre la section';
+    downBtn.disabled = sectionIndex >= totalSections - 1;
+    downBtn.style.opacity = sectionIndex >= totalSections - 1 ? '0.3' : '1';
+    downBtn.addEventListener('click', function() { moveSectionDown(section.id); });
+    actions.appendChild(downBtn);
+
+    var editBtn = document.createElement('button');
+    editBtn.type = 'button';
+    editBtn.style.cssText = 'background:transparent; border:1px solid rgba(255,255,255,0.3); color:#fff; padding:2px 8px; font-size:10px; cursor:pointer;';
+    editBtn.textContent = '✎';
+    editBtn.title = 'Modifier la section';
+    editBtn.addEventListener('click', function() { openSectionModal(section.id); });
+    actions.appendChild(editBtn);
+
+    var addBtn = document.createElement('button');
+    addBtn.type = 'button';
+    addBtn.style.cssText = 'background:transparent; border:1px solid rgba(255,255,255,0.3); color:#fff; padding:2px 8px; font-size:10px; cursor:pointer;';
+    addBtn.textContent = '+ Tâche';
+    addBtn.addEventListener('click', function() { openTaskModal(null, section.id); });
+    actions.appendChild(addBtn);
+
+    inner.appendChild(actions);
+  }
+  td.appendChild(inner);
+  tr.appendChild(td);
+  body.appendChild(tr);
+}
+
+function renderTaskRow(body, t, statuses, taskIdx, totalInSection) {
+  var status = null;
+  for (var i = 0; i < statuses.length; i++) {
+    if (statuses[i].id === t.statusId) { status = statuses[i]; break; }
+  }
+  if (!status) status = statuses[0];
+  var isDone = status.id === statuses[statuses.length - 1].id;
+  var phase = getPhaseById(t.phase);
+
+  var row = document.createElement('tr');
+  if (isDone) row.classList.add('done');
+
+  // Statut
+  var tdStatus = document.createElement('td');
+  var sel = document.createElement('select');
+  sel.className = 'status-select';
+  sel.style.background = status.color;
+  sel.style.borderColor = status.color;
+  sel.dataset.task = t.id;
+  statuses.forEach(function(st) {
+    var o = document.createElement('option');
+    o.value = st.id;
+    o.textContent = st.label;
+    o.style.background = '#fff';
+    o.style.color = '#000';
+    if (st.id === t.statusId) o.selected = true;
+    sel.appendChild(o);
+  });
+  sel.addEventListener('change', async function() {
+    t.statusId = sel.value;
+    await saveState();
+    renderTasks();
+    renderStats();
+    renderCalendar();
+  });
+  tdStatus.appendChild(sel);
+  row.appendChild(tdStatus);
+
+  // Phase
+  var tdPhase = document.createElement('td');
+  var phaseTag = document.createElement('span');
+  phaseTag.style.cssText = 'display:inline-block; font-family:JetBrains Mono,monospace; font-size:9px; padding:2px 7px; color:#fff; font-weight:600; letter-spacing:0.05em; background:' + phase.color + ';';
+  phaseTag.textContent = phase.label;
+  tdPhase.appendChild(phaseTag);
+  row.appendChild(tdPhase);
+
+  // Nom
+  var tdName = document.createElement('td');
+  tdName.innerHTML = '<span class="task-name">' + escapeHtml(t.name) + '</span>';
+  row.appendChild(tdName);
+
+  // Dates
+  var tdDates = document.createElement('td');
+  var dateStr = '';
+  if (t.startDate && t.endDate) {
+    if (t.startDate === t.endDate) dateStr = formatDateShort(t.startDate);
+    else dateStr = formatDateShort(t.startDate) + ' → ' + formatDateShort(t.endDate);
+  } else if (t.startDate) {
+    dateStr = formatDateShort(t.startDate);
+  } else {
+    dateStr = '—';
+  }
+  tdDates.innerHTML = '<span class="task-dates">' + escapeHtml(dateStr) + '</span>';
+  row.appendChild(tdDates);
+
+  // Assignés
+  var tdAssign = document.createElement('td');
+  tdAssign.className = 'assignment-cell';
+  var list = document.createElement('div');
+  list.className = 'assignment-list';
+
+  (t.assigned || []).forEach(function(pid) {
+    var person = findPerson(pid);
+    if (!person) return;
+    var chip = document.createElement('span');
+    chip.className = 'assigned-chip ' + (isCharp(pid) ? 'charp' : 'sub');
+    var nameBtn = document.createElement('span');
+    nameBtn.style.cursor = 'pointer';
+    nameBtn.textContent = person.name;
+    nameBtn.title = 'Cliquer pour contacter';
+    nameBtn.addEventListener('click', function() { openCallSheet(person); });
+    chip.appendChild(nameBtn);
+    var rmBtn = document.createElement('button');
+    rmBtn.type = 'button';
+    rmBtn.className = 'remove-x';
+    rmBtn.textContent = '×';
+    rmBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      removeAssignment(t.id, pid);
+    });
+    chip.appendChild(rmBtn);
+    list.appendChild(chip);
+  });
+
+  var addBtn = document.createElement('button');
+  addBtn.type = 'button';
+  addBtn.className = 'add-assign-btn';
+  addBtn.textContent = '+ Assigner';
+  addBtn.addEventListener('click', function() { openPicker(t.id, t.name); });
+  list.appendChild(addBtn);
+
+  tdAssign.appendChild(list);
+  row.appendChild(tdAssign);
+
+  // Actions : ↑ ↓ ✎ ×
+  var tdActions = document.createElement('td');
+  var actions = document.createElement('div');
+  actions.className = 'row-actions';
+
+  var upBtn = document.createElement('button');
+  upBtn.type = 'button';
+  upBtn.className = 'row-action-btn';
+  upBtn.textContent = '↑';
+  upBtn.title = 'Monter';
+  upBtn.disabled = taskIdx === 0;
+  upBtn.style.opacity = taskIdx === 0 ? '0.3' : '1';
+  upBtn.addEventListener('click', function() { moveTaskUp(t.id); });
+  actions.appendChild(upBtn);
+
+  var downBtn = document.createElement('button');
+  downBtn.type = 'button';
+  downBtn.className = 'row-action-btn';
+  downBtn.textContent = '↓';
+  downBtn.title = 'Descendre';
+  downBtn.disabled = taskIdx >= totalInSection - 1;
+  downBtn.style.opacity = taskIdx >= totalInSection - 1 ? '0.3' : '1';
+  downBtn.addEventListener('click', function() { moveTaskDown(t.id); });
+  actions.appendChild(downBtn);
+
+  var editBtn = document.createElement('button');
+  editBtn.type = 'button';
+  editBtn.className = 'row-action-btn';
+  editBtn.textContent = '✎';
+  editBtn.title = 'Modifier la tâche';
+  editBtn.addEventListener('click', function() { openTaskModal(t.id); });
+  actions.appendChild(editBtn);
+
+  var delBtn = document.createElement('button');
+  delBtn.type = 'button';
+  delBtn.className = 'row-action-btn del';
+  delBtn.textContent = '×';
+  delBtn.title = 'Supprimer la tâche';
+  delBtn.addEventListener('click', function() { deleteTask(t.id); });
+  actions.appendChild(delBtn);
+
+  tdActions.appendChild(actions);
+  row.appendChild(tdActions);
+
+  body.appendChild(row);
+}
+
+function renderStats() {
+  var bar = $('statsBar');
+  if (!bar) return;
+  var proj = getActiveProject();
+  if (!proj) { bar.innerHTML = ''; return; }
+
+  var tasks = proj.tasks || [];
+  var statuses = getProjectStatuses(proj);
+  var doneId = statuses[statuses.length - 1].id;
+  var total = tasks.length;
+  var done = tasks.filter(function(t) { return t.statusId === doneId; }).length;
+  var pct = total ? Math.round((done / total) * 100) : 0;
+  var unassigned = tasks.filter(function(t) {
+    return (!t.assigned || t.assigned.length === 0) && t.statusId !== doneId;
+  }).length;
+
+  var charpAssigned = {};
+  tasks.forEach(function(t) {
+    (t.assigned || []).forEach(function(pid) { if (isCharp(pid)) charpAssigned[pid] = true; });
+  });
+  var charpCount = Object.keys(charpAssigned).length;
+
+  var accent = proj.color || '#C2410C';
+
+  bar.innerHTML =
+    '<div class="stat-card" style="border-top-color:' + accent + '">' +
+      '<div class="stat-label">Avancement</div>' +
+      '<div class="stat-value">' + pct + '<small>%</small></div>' +
+      '<div class="stat-progress"><div class="stat-progress-fill" style="width:' + pct + '%; background:' + accent + '"></div></div>' +
+    '</div>' +
+    '<div class="stat-card" style="border-top-color:var(--green-ok)">' +
+      '<div class="stat-label">Tâches complétées</div>' +
+      '<div class="stat-value">' + done + '<small> / ' + total + '</small></div>' +
+    '</div>' +
+    '<div class="stat-card" style="border-top-color:var(--ochre)">' +
+      '<div class="stat-label">Charpentiers actifs</div>' +
+      '<div class="stat-value">' + charpCount + '<small> / ' + state.charpentiers.length + '</small></div>' +
+    '</div>' +
+    '<div class="stat-card" style="border-top-color:' + (unassigned > 0 ? 'var(--crimson)' : 'var(--ink-3)') + '">' +
+      '<div class="stat-label">À assigner</div>' +
+      '<div class="stat-value">' + unassigned + '<small> tâche' + (unassigned > 1 ? 's' : '') + '</small></div>' +
+    '</div>';
+}
+
+// ============================================================
+// RÉORGANISATION
+// ============================================================
+async function moveSectionUp(sectionId) {
+  var proj = getActiveProject();
+  if (!proj) return;
+  var idx = -1;
+  for (var i = 0; i < proj.sections.length; i++) {
+    if (proj.sections[i].id === sectionId) { idx = i; break; }
+  }
+  if (idx <= 0) return;
+  moveItem(proj.sections, idx, idx - 1);
+  await saveState();
+  renderTasks();
+}
+
+async function moveSectionDown(sectionId) {
+  var proj = getActiveProject();
+  if (!proj) return;
+  var idx = -1;
+  for (var i = 0; i < proj.sections.length; i++) {
+    if (proj.sections[i].id === sectionId) { idx = i; break; }
+  }
+  if (idx === -1 || idx >= proj.sections.length - 1) return;
+  moveItem(proj.sections, idx, idx + 1);
+  await saveState();
+  renderTasks();
+}
+
+async function moveTaskUp(taskId) {
+  var proj = getActiveProject();
+  if (!proj) return;
+  var task = null;
+  for (var i = 0; i < proj.tasks.length; i++) {
+    if (proj.tasks[i].id === taskId) { task = proj.tasks[i]; break; }
+  }
+  if (!task) return;
+  // Trouver l'index global et l'index parmi les tâches de la même section
+  var sectionTasks = proj.tasks.filter(function(t) { return t.sectionId === task.sectionId; });
+  var localIdx = sectionTasks.indexOf(task);
+  if (localIdx <= 0) return;
+  var prevTask = sectionTasks[localIdx - 1];
+  // Échanger les positions globales
+  var globalIdx = proj.tasks.indexOf(task);
+  var prevGlobalIdx = proj.tasks.indexOf(prevTask);
+  proj.tasks[globalIdx] = prevTask;
+  proj.tasks[prevGlobalIdx] = task;
+  await saveState();
+  renderTasks();
+}
+
+async function moveTaskDown(taskId) {
+  var proj = getActiveProject();
+  if (!proj) return;
+  var task = null;
+  for (var i = 0; i < proj.tasks.length; i++) {
+    if (proj.tasks[i].id === taskId) { task = proj.tasks[i]; break; }
+  }
+  if (!task) return;
+  var sectionTasks = proj.tasks.filter(function(t) { return t.sectionId === task.sectionId; });
+  var localIdx = sectionTasks.indexOf(task);
+  if (localIdx === -1 || localIdx >= sectionTasks.length - 1) return;
+  var nextTask = sectionTasks[localIdx + 1];
+  var globalIdx = proj.tasks.indexOf(task);
+  var nextGlobalIdx = proj.tasks.indexOf(nextTask);
+  proj.tasks[globalIdx] = nextTask;
+  proj.tasks[nextGlobalIdx] = task;
+  await saveState();
+  renderTasks();
+}
+
+// ============================================================
+// SECTION MODAL
+// ============================================================
+function openSectionModal(sectionId) {
+  if (!state.activeProjectId) { showToast('Crée d\'abord un projet'); return; }
+  editingSectionId = sectionId;
+  var proj = getActiveProject();
+  var section = null;
+  if (sectionId) {
+    for (var i = 0; i < proj.sections.length; i++) {
+      if (proj.sections[i].id === sectionId) { section = proj.sections[i]; break; }
+    }
+  }
+  $('sectionModalTitle').textContent = sectionId ? 'Modifier la section' : 'Nouvelle section';
+  $('sectionName').value = section ? section.name : '';
+  $('sectionDelete').style.display = sectionId ? 'inline-flex' : 'none';
+  showModal('sectionModal');
+  setTimeout(function() { $('sectionName').focus(); }, 50);
+}
+
+async function saveSection() {
+  var name = $('sectionName').value.trim();
+  if (!name) { showToast('Le nom est requis'); return; }
+  var proj = getActiveProject();
+  if (!proj) return;
+  if (editingSectionId) {
+    for (var i = 0; i < proj.sections.length; i++) {
+      if (proj.sections[i].id === editingSectionId) { proj.sections[i].name = name; break; }
+    }
+  } else {
+    proj.sections.push({ id: generateId('sec'), name: name });
+  }
+  await saveState();
+  hideModal('sectionModal');
+  showToast(editingSectionId ? 'Section mise à jour' : 'Section créée');
+  renderTasks();
+}
+
+async function deleteSection() {
+  if (!editingSectionId) return;
+  if (!confirm('Supprimer cette section ? Les tâches qu\'elle contient seront déplacées dans « Sans section ».')) return;
+  var proj = getActiveProject();
+  if (!proj) return;
+  proj.sections = proj.sections.filter(function(s) { return s.id !== editingSectionId; });
+  proj.tasks.forEach(function(t) {
+    if (t.sectionId === editingSectionId) t.sectionId = null;
+  });
+  await saveState();
+  hideModal('sectionModal');
+  showToast('Section supprimée');
+  renderTasks();
+}
+
+// ============================================================
+// TASK MODAL
+// ============================================================
+function openTaskModal(taskId, defaultSectionId) {
+  if (!state.activeProjectId) { showToast('Crée d\'abord un projet'); return; }
+  editingTaskId = taskId;
+  var proj = getActiveProject();
+  var task = null;
+  if (taskId) {
+    for (var i = 0; i < proj.tasks.length; i++) {
+      if (proj.tasks[i].id === taskId) { task = proj.tasks[i]; break; }
+    }
+  }
+
+  $('taskModalTitle').textContent = taskId ? 'Modifier la tâche' : 'Nouvelle tâche';
+  $('taskName').value = task ? task.name : '';
+
+  // Remplir les phases dynamiquement depuis le projet
+  var phases = getProjectPhases(proj);
+  var phaseSel = $('taskPhase');
+  phaseSel.innerHTML = '';
+  phases.forEach(function(p) {
+    var o = document.createElement('option');
+    o.value = p.id;
+    o.textContent = p.label;
+    phaseSel.appendChild(o);
+  });
+  $('taskPhase').value = task ? task.phase : phases[0].id;
+
+  $('taskStartDate').value = task ? (task.startDate || '') : (proj.startDate || '');
+  $('taskEndDate').value = task ? (task.endDate || '') : (proj.startDate || '');
+
+  // Sections
+  var sectionSel = $('taskSection');
+  sectionSel.innerHTML = '';
+  var noOpt = document.createElement('option');
+  noOpt.value = '';
+  noOpt.textContent = '— Sans section —';
+  sectionSel.appendChild(noOpt);
+  proj.sections.forEach(function(s) {
+    var o = document.createElement('option');
+    o.value = s.id;
+    o.textContent = s.name;
+    sectionSel.appendChild(o);
+  });
+  if (task) sectionSel.value = task.sectionId || '';
+  else if (defaultSectionId) sectionSel.value = defaultSectionId;
+
+  $('taskDelete').style.display = taskId ? 'inline-flex' : 'none';
+  showModal('taskModal');
+  setTimeout(function() { $('taskName').focus(); }, 50);
+}
+
+async function saveTask() {
+  var name = $('taskName').value.trim();
+  if (!name) { showToast('Le nom est requis'); return; }
+  var proj = getActiveProject();
+  if (!proj) return;
+  var data = {
+    name: name,
+    phase: $('taskPhase').value,
+    sectionId: $('taskSection').value || null,
+    startDate: $('taskStartDate').value || null,
+    endDate: $('taskEndDate').value || null
+  };
+  // Si fin avant début, on aligne
+  if (data.startDate && data.endDate && data.endDate < data.startDate) {
+    data.endDate = data.startDate;
+  }
+
+  if (editingTaskId) {
+    for (var i = 0; i < proj.tasks.length; i++) {
+      if (proj.tasks[i].id === editingTaskId) {
+        Object.keys(data).forEach(function(k) { proj.tasks[i][k] = data[k]; });
+        break;
+      }
+    }
+  } else {
+    var newTask = {
+      id: generateId('t'),
+      statusId: getProjectStatuses(proj)[0].id,
+      assigned: []
+    };
+    Object.keys(data).forEach(function(k) { newTask[k] = data[k]; });
+    proj.tasks.push(newTask);
+  }
+  await saveState();
+  hideModal('taskModal');
+  showToast(editingTaskId ? 'Tâche mise à jour' : 'Tâche créée');
+  renderTasks();
+  renderStats();
+  renderCalendar();
+}
+
+async function deleteTask(taskId) {
+  if (!confirm('Supprimer cette tâche ?')) return;
+  var proj = getActiveProject();
+  if (!proj) return;
+  proj.tasks = proj.tasks.filter(function(t) { return t.id !== taskId; });
+  await saveState();
+  showToast('Tâche supprimée');
+  renderTasks();
+  renderStats();
+  renderCalendar();
+}
+
+async function deleteTaskFromModal() {
+  if (!editingTaskId) return;
+  if (!confirm('Supprimer cette tâche ?')) return;
+  var proj = getActiveProject();
+  if (!proj) return;
+  proj.tasks = proj.tasks.filter(function(t) { return t.id !== editingTaskId; });
+  await saveState();
+  hideModal('taskModal');
+  showToast('Tâche supprimée');
+  renderTasks();
+  renderStats();
+  renderCalendar();
+}
+
+// ============================================================
+// STATUS MODAL
+// ============================================================
+function openStatusModal() {
+  if (!state.activeProjectId) { showToast('Crée d\'abord un projet'); return; }
+  editingStatuses = JSON.parse(JSON.stringify(getProjectStatuses()));
+  renderStatusList();
+  showModal('statusModal');
+}
+
+function renderStatusList() {
+  var wrap = $('statusList');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  editingStatuses.forEach(function(st, idx) {
+    var row = document.createElement('div');
+    row.className = 'status-row';
+
+    var colorInput = document.createElement('input');
+    colorInput.type = 'color';
+    colorInput.value = st.color;
+    colorInput.addEventListener('change', function() {
+      editingStatuses[idx].color = colorInput.value;
+    });
+    row.appendChild(colorInput);
+
+    var labelInput = document.createElement('input');
+    labelInput.type = 'text';
+    labelInput.value = st.label;
+    labelInput.placeholder = 'Nom du statut';
+    labelInput.addEventListener('input', function() {
+      editingStatuses[idx].label = labelInput.value;
+    });
+    row.appendChild(labelInput);
+
+    var upBtn = document.createElement('button');
+    upBtn.type = 'button';
+    upBtn.className = 'btn btn-sm';
+    upBtn.textContent = '↑';
+    upBtn.disabled = idx === 0;
+    upBtn.addEventListener('click', function() {
+      if (idx > 0) {
+        var tmp = editingStatuses[idx - 1];
+        editingStatuses[idx - 1] = editingStatuses[idx];
+        editingStatuses[idx] = tmp;
+        renderStatusList();
+      }
+    });
+    row.appendChild(upBtn);
+
+    var downBtn = document.createElement('button');
+    downBtn.type = 'button';
+    downBtn.className = 'btn btn-sm';
+    downBtn.textContent = '↓';
+    downBtn.disabled = idx === editingStatuses.length - 1;
+    downBtn.addEventListener('click', function() {
+      if (idx < editingStatuses.length - 1) {
+        var tmp = editingStatuses[idx + 1];
+        editingStatuses[idx + 1] = editingStatuses[idx];
+        editingStatuses[idx] = tmp;
+        renderStatusList();
+      }
+    });
+    row.appendChild(downBtn);
+
+    var delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 'btn btn-sm';
+    delBtn.textContent = '×';
+    delBtn.style.cssText = 'color:var(--crimson); border-color:var(--crimson);';
+    delBtn.disabled = editingStatuses.length <= 1;
+    delBtn.addEventListener('click', function() {
+      if (editingStatuses.length > 1) {
+        editingStatuses.splice(idx, 1);
+        renderStatusList();
+      }
+    });
+    row.appendChild(delBtn);
+
+    if (idx === editingStatuses.length - 1) {
+      var doneTag = document.createElement('div');
+      doneTag.className = 'done-tag';
+      doneTag.textContent = '↑ Statut « complété »';
+      row.appendChild(doneTag);
+    }
+
+    wrap.appendChild(row);
+  });
+}
+
+async function saveStatuses() {
+  var valid = editingStatuses.filter(function(s) { return s.label && s.label.trim(); });
+  if (valid.length === 0) { showToast('Au moins un statut requis'); return; }
+  valid.forEach(function(s) {
+    if (!s.id) s.id = generateId('st');
+  });
+  var proj = getActiveProject();
+  if (!proj) return;
+  proj.statuses = valid;
+
+  // Réassigner les statuses orphelins
+  var validIds = {};
+  valid.forEach(function(s) { validIds[s.id] = true; });
+  proj.tasks.forEach(function(t) {
+    if (!t.statusId || !validIds[t.statusId]) t.statusId = valid[0].id;
+  });
+
+  await saveState();
+  hideModal('statusModal');
+  showToast('Statuts mis à jour');
+  renderTasks();
+  renderStats();
+  renderCalendar();
+}
+
+function addNewStatus() {
+  editingStatuses.push({
+    id: generateId('st'),
+    label: '',
+    color: '#8A8278'
+  });
+  renderStatusList();
+}
+
+function resetStatusesEditing() {
+  if (!confirm('Restaurer les statuts par défaut ?')) return;
+  editingStatuses = JSON.parse(JSON.stringify(DEFAULT_STATUSES));
+  renderStatusList();
+}
+
+// ============================================================
+// PICKER
+// ============================================================
+function openPicker(taskId, taskName) {
+  currentPickerTaskId = taskId;
+  $('pickerTaskName').textContent = 'Tâche : ' + taskName;
+  var proj = getActiveProject();
+  if (!proj) return;
+  var task = null;
+  for (var i = 0; i < proj.tasks.length; i++) {
+    if (proj.tasks[i].id === taskId) { task = proj.tasks[i]; break; }
+  }
+  if (!task) return;
+
+  var list = $('pickerList');
+  list.innerHTML = '';
+
+  var charpHeader = document.createElement('div');
+  charpHeader.className = 'picker-section-title';
+  charpHeader.textContent = 'Mon équipe — charpentiers';
+  list.appendChild(charpHeader);
+
+  if (state.charpentiers.length === 0) {
+    var emptyC = document.createElement('div');
+    emptyC.className = 'picker-empty';
+    emptyC.textContent = 'Aucun charpentier dans ton équipe.';
+    list.appendChild(emptyC);
+  } else {
+    state.charpentiers.forEach(function(p) {
+      var isAssigned = (task.assigned || []).indexOf(p.id) !== -1;
+      var item = document.createElement('div');
+      item.className = 'picker-item' + (isAssigned ? ' assigned' : '');
+      item.innerHTML =
+        '<div class="picker-item-info">' +
+          '<div class="picker-item-name">' + escapeHtml(p.name) + '</div>' +
+          '<div class="picker-item-role">' + escapeHtml(p.role) + '</div>' +
+        '</div>' +
+        '<div style="font-family:\'JetBrains Mono\',monospace; font-size:10px; color:' + (isAssigned ? 'var(--green-ok)' : 'var(--ink-3)') + ';">' + (isAssigned ? '✓ Assigné' : '+ Ajouter') + '</div>';
+      if (!isAssigned) item.addEventListener('click', function() { addAssignment(taskId, p.id); });
+      list.appendChild(item);
+    });
+  }
+
+  var subHeader = document.createElement('div');
+  subHeader.className = 'picker-section-title';
+  subHeader.textContent = 'Sous-traitants liés à ce projet';
+  list.appendChild(subHeader);
+
+  var linkedSubs = state.subs.filter(function(s) {
+    return (s.projectIds || []).indexOf(state.activeProjectId) !== -1;
+  });
+
+  if (linkedSubs.length === 0) {
+    var empty = document.createElement('div');
+    empty.className = 'picker-empty';
+    empty.textContent = 'Aucun sous-traitant lié à ce projet.';
+    list.appendChild(empty);
+  } else {
+    linkedSubs.forEach(function(p) {
+      var isAssigned = (task.assigned || []).indexOf(p.id) !== -1;
+      var item = document.createElement('div');
+      item.className = 'picker-item' + (isAssigned ? ' assigned' : '');
+      item.innerHTML =
+        '<div class="picker-item-info">' +
+          '<div class="picker-item-name">' + escapeHtml(p.name) + '</div>' +
+          '<div class="picker-item-role">' + escapeHtml(p.role) + ' · ' + escapeHtml(p.company || '') + '</div>' +
+        '</div>' +
+        '<div style="font-family:\'JetBrains Mono\',monospace; font-size:10px; color:' + (isAssigned ? 'var(--green-ok)' : 'var(--ink-3)') + ';">' + (isAssigned ? '✓ Assigné' : '+ Ajouter') + '</div>';
+      if (!isAssigned) item.addEventListener('click', function() { addAssignment(taskId, p.id); });
+      list.appendChild(item);
+    });
+  }
+
+  showModal('pickerModal');
+}
+
+async function addAssignment(taskId, personId) {
+  var proj = getActiveProject();
+  if (!proj) return;
+  var task = null;
+  for (var i = 0; i < proj.tasks.length; i++) {
+    if (proj.tasks[i].id === taskId) { task = proj.tasks[i]; break; }
+  }
+  if (!task) return;
+  if (!task.assigned) task.assigned = [];
+  if (task.assigned.indexOf(personId) !== -1) return;
+  task.assigned.push(personId);
+  await saveState();
+  var p = findPerson(personId);
+  showToast((p ? p.name : 'Contact') + ' assigné');
+  hideModal('pickerModal');
+  renderTasks();
+  renderStats();
+  renderCharpentiers();
+  renderCalendar();
+}
+
+async function removeAssignment(taskId, personId) {
+  var proj = getActiveProject();
+  if (!proj) return;
+  var task = null;
+  for (var i = 0; i < proj.tasks.length; i++) {
+    if (proj.tasks[i].id === taskId) { task = proj.tasks[i]; break; }
+  }
+  if (!task) return;
+  task.assigned = (task.assigned || []).filter(function(id) { return id !== personId; });
+  await saveState();
+  renderTasks();
+  renderStats();
+  renderCharpentiers();
+  renderCalendar();
+}
+
+// ============================================================
+// CALL SHEET
+// ============================================================
+function openCallSheet(person) {
+  if (!person) return;
+  $('callName').textContent = person.name;
+  $('callRole').textContent = person.role + (person.company ? ' · ' + person.company : '');
+  $('callPhone').textContent = person.phone;
+  var c = cleanPhone(person.phone);
+  $('callBtnCall').href = 'tel:' + c;
+  $('callBtnSms').href = 'sms:' + c;
+  showModal('callModal');
+}
+
+// ============================================================
+// CONTACTS
+// ============================================================
+function getProjectsForCharp(charpId) {
+  var ids = {};
+  state.projects.forEach(function(p) {
+    (p.tasks || []).forEach(function(t) {
+      if ((t.assigned || []).indexOf(charpId) !== -1) ids[p.id] = true;
+    });
+  });
+  return Object.keys(ids).map(function(id) {
+    for (var i = 0; i < state.projects.length; i++) {
+      if (state.projects[i].id === id) return state.projects[i];
+    }
+    return null;
+  }).filter(function(x) { return x; });
+}
+
+function renderCharpentiers() {
+  var grid = $('charpGrid');
+  if (!grid) return;
+  grid.innerHTML = '';
+
+  if (state.charpentiers.length === 0) {
+    grid.innerHTML =
+      '<div class="empty-state">' +
+        '<div class="es-title">Aucun charpentier</div>' +
+        '<div class="es-text">Ajoute les membres de ton équipe pour pouvoir les assigner sur tes chantiers.</div>' +
+        '<button class="btn btn-accent" id="emptyAddCharp" type="button" style="font-size:14px; padding:10px 20px;">+ Ajouter mon premier charpentier</button>' +
+      '</div>';
+    var eb = $('emptyAddCharp');
+    if (eb) eb.addEventListener('click', function() { openContactEdit('charp', null); });
+    return;
+  }
+
+  state.charpentiers.forEach(function(p) {
+    var card = document.createElement('div');
+    card.className = 'contact-card charp';
+    var projects = getProjectsForCharp(p.id);
+    var chipsHtml = projects.length === 0
+      ? '<span style="font-size:10px; color:var(--ink-3); font-style:italic;">Aucun projet</span>'
+      : projects.map(function(pp) {
+          return '<span class="proj-chip" style="background:' + pp.color + '">' + escapeHtml(pp.code || pp.name) + '</span>';
+        }).join('');
+    card.innerHTML =
+      '<button class="contact-edit" data-edit-charp="' + p.id + '" type="button" title="Modifier">✎ Modifier</button>' +
+      '<div class="contact-header">' +
+        '<div>' +
+          '<div class="contact-name">' + escapeHtml(p.name) + '</div>' +
+          '<div class="contact-role">' + escapeHtml(p.role) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="contact-phone">' + escapeHtml(p.phone) + '</div>' +
+      '<div class="proj-chip-list">' + chipsHtml + '</div>' +
+      '<div class="contact-actions">' +
+        '<button class="btn btn-sm btn-primary" data-call="' + p.id + '" type="button">📞 Contacter</button>' +
+      '</div>';
+    grid.appendChild(card);
+  });
+
+  grid.querySelectorAll('[data-edit-charp]').forEach(function(btn) {
+    btn.addEventListener('click', function() { openContactEdit('charp', btn.dataset.editCharp); });
+  });
+  grid.querySelectorAll('[data-call]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var p = findPerson(btn.dataset.call);
+      if (p) openCallSheet(p);
+    });
+  });
+}
+
+function renderSubs() {
+  var filterBar = $('subFilterChips');
+  var grid = $('subsGrid');
+  if (!filterBar || !grid) return;
+
+  filterBar.innerHTML = '<span style="font-family:\'JetBrains Mono\',monospace; font-size:10px; letter-spacing:0.1em; color:var(--ink-3); margin-right:6px;">FILTRER PAR PROJET :</span>';
+
+  var allBtn = document.createElement('button');
+  allBtn.type = 'button';
+  allBtn.className = 'filter-chip' + (subFilter === 'all' ? ' active' : '');
+  allBtn.textContent = 'Tous';
+  allBtn.addEventListener('click', function() { subFilter = 'all'; renderSubs(); });
+  filterBar.appendChild(allBtn);
+
+  state.projects.forEach(function(p) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'filter-chip' + (subFilter === p.id ? ' active' : '');
+    btn.style.borderColor = p.color;
+    if (subFilter === p.id) {
+      btn.style.background = p.color;
+      btn.style.color = '#fff';
+    }
+    btn.textContent = p.name;
+    btn.addEventListener('click', function() { subFilter = p.id; renderSubs(); });
+    filterBar.appendChild(btn);
+  });
+
+  grid.innerHTML = '';
+
+  if (state.subs.length === 0) {
+    grid.innerHTML =
+      '<div class="empty-state">' +
+        '<div class="es-title">Aucun sous-traitant</div>' +
+        '<div class="es-text">Ajoute tes sous-traitants et lie-les aux projets sur lesquels ils travaillent.</div>' +
+        '<button class="btn btn-accent" id="emptyAddSub" type="button" style="font-size:14px; padding:10px 20px;">+ Ajouter mon premier sous-traitant</button>' +
+      '</div>';
+    var eb = $('emptyAddSub');
+    if (eb) eb.addEventListener('click', function() { openContactEdit('sub', null); });
+    return;
+  }
+
+  var visible = state.subs;
+  if (subFilter !== 'all') {
+    visible = state.subs.filter(function(s) { return (s.projectIds || []).indexOf(subFilter) !== -1; });
+  }
+
+  if (visible.length === 0) {
+    grid.innerHTML = '<div class="empty-state"><div class="es-text">Aucun sous-traitant pour ce filtre.</div></div>';
+    return;
+  }
+
+  visible.forEach(function(p) {
+    var projects = (p.projectIds || []).map(function(id) {
+      for (var i = 0; i < state.projects.length; i++) {
+        if (state.projects[i].id === id) return state.projects[i];
+      }
+      return null;
+    }).filter(function(x) { return x; });
+
+    var chipsHtml = projects.length === 0
+      ? '<span style="font-size:10px; color:var(--ink-3); font-style:italic;">Aucun projet lié</span>'
+      : projects.map(function(pp) {
+          return '<span class="proj-chip" style="background:' + pp.color + '">' + escapeHtml(pp.code || pp.name) + '</span>';
+        }).join('');
+
+    var card = document.createElement('div');
+    card.className = 'contact-card sub';
+    card.innerHTML =
+      '<button class="contact-edit" data-edit-sub="' + p.id + '" type="button" title="Modifier">✎ Modifier</button>' +
+      '<div class="contact-header">' +
+        '<div>' +
+          '<div class="contact-name">' + escapeHtml(p.name) + '</div>' +
+          '<div class="contact-role">' + escapeHtml(p.role) + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="contact-company">' + escapeHtml(p.company || '') + '</div>' +
+      '<div class="contact-phone">' + escapeHtml(p.phone) + '</div>' +
+      '<div class="proj-chip-list">' + chipsHtml + '</div>' +
+      '<div class="contact-actions">' +
+        '<button class="btn btn-sm btn-primary" data-call="' + p.id + '" type="button">📞 Contacter</button>' +
+      '</div>';
+    grid.appendChild(card);
+  });
+
+  grid.querySelectorAll('[data-edit-sub]').forEach(function(btn) {
+    btn.addEventListener('click', function() { openContactEdit('sub', btn.dataset.editSub); });
+  });
+  grid.querySelectorAll('[data-call]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var p = findPerson(btn.dataset.call);
+      if (p) openCallSheet(p);
+    });
+  });
+}
+
+// ============================================================
+// CONTACT EDIT
+// ============================================================
+function openContactEdit(type, id) {
+  editingContact = { type: type, id: id };
+  var isNew = !id;
+  var arr = type === 'charp' ? state.charpentiers : state.subs;
+  var person = null;
+  if (id) {
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i].id === id) { person = arr[i]; break; }
+    }
+  }
+
+  $('contactModalTitle').textContent = isNew
+    ? (type === 'charp' ? 'Nouveau charpentier' : 'Nouveau sous-traitant')
+    : 'Modifier ' + (type === 'charp' ? 'charpentier' : 'sous-traitant');
+
+  $('contactName').value = person ? person.name : '';
+  $('contactRole').value = person ? person.role : '';
+  $('contactCompany').value = person ? (person.company || '') : '';
+  $('contactPhone').value = person ? person.phone : '';
+
+  $('contactCompanyGroup').style.display = type === 'sub' ? 'block' : 'none';
+  $('contactProjectsGroup').style.display = type === 'sub' ? 'block' : 'none';
+  $('contactDelete').style.display = isNew ? 'none' : 'inline-flex';
+
+  if (type === 'sub') {
+    var linkedIds = person ? (person.projectIds || []) : (state.activeProjectId ? [state.activeProjectId] : []);
+    var wrap = $('contactProjectLinks');
+    wrap.innerHTML = '';
+    if (state.projects.length === 0) {
+      wrap.innerHTML = '<div style="padding:10px; color:var(--ink-3); font-size:12px; font-style:italic;">Aucun projet existant. Crée d\'abord un projet.</div>';
+    } else {
+      state.projects.forEach(function(p) {
+        var row = document.createElement('label');
+        row.className = 'project-link-row';
+        row.innerHTML =
+          '<input type="checkbox" value="' + p.id + '" ' + (linkedIds.indexOf(p.id) !== -1 ? 'checked' : '') + '>' +
+          '<span class="pcolor" style="background:' + p.color + '"></span>' +
+          '<span class="pname">' + escapeHtml(p.name) + '</span>';
+        wrap.appendChild(row);
+      });
+    }
+  }
+
+  showModal('contactModal');
+  setTimeout(function() { $('contactName').focus(); }, 50);
+}
+
+async function saveContactEdit() {
+  if (!editingContact) return;
+  var name = $('contactName').value.trim();
+  if (!name) { showToast('Le nom est requis'); return; }
+  var role = $('contactRole').value.trim();
+  var company = $('contactCompany').value.trim();
+  var phone = $('contactPhone').value.trim();
+
+  var type = editingContact.type;
+  var id = editingContact.id;
+  var arr = type === 'charp' ? state.charpentiers : state.subs;
+
+  var projectIds = [];
+  if (type === 'sub') {
+    document.querySelectorAll('#contactProjectLinks input[type="checkbox"]:checked').forEach(function(cb) {
+      projectIds.push(cb.value);
+    });
+  }
+
+  if (id) {
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i].id === id) {
+        arr[i].name = name;
+        arr[i].role = role;
+        arr[i].phone = phone;
+        if (type === 'sub') {
+          arr[i].company = company;
+          arr[i].projectIds = projectIds;
+        }
+        break;
+      }
+    }
+  } else {
+    var newId = generateId(type === 'charp' ? 'c' : 's');
+    var newP = { id: newId, name: name, role: role, phone: phone };
+    if (type === 'sub') { newP.company = company; newP.projectIds = projectIds; }
+    arr.push(newP);
+  }
+
+  await saveState();
+  hideModal('contactModal');
+  showToast(id ? 'Contact mis à jour' : 'Contact ajouté');
+  renderAll();
+}
+
+async function deleteContactEdit() {
+  if (!editingContact || !editingContact.id) return;
+  if (!confirm('Supprimer ce contact ? Il sera retiré de toutes les tâches.')) return;
+  var type = editingContact.type;
+  var id = editingContact.id;
+
+  if (type === 'charp') {
+    state.charpentiers = state.charpentiers.filter(function(p) { return p.id !== id; });
+  } else {
+    state.subs = state.subs.filter(function(p) { return p.id !== id; });
+  }
+  state.projects.forEach(function(proj) {
+    (proj.tasks || []).forEach(function(t) {
+      t.assigned = (t.assigned || []).filter(function(x) { return x !== id; });
+    });
+  });
+
+  await saveState();
+  hideModal('contactModal');
+  showToast('Contact supprimé');
+  renderAll();
+}
+
+// ============================================================
+// CALENDAR
+// ============================================================
+function buildMonthAssignments() {
+  var map = {};
+  var monthStart = new Date(calMonth.getFullYear(), calMonth.getMonth(), 1);
+  var monthEnd = new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 0, 23, 59, 59);
+
+  state.projects.forEach(function(proj) {
+    var statuses = getProjectStatuses(proj);
+    var doneId = statuses[statuses.length - 1].id;
+
+    (proj.tasks || []).forEach(function(t) {
+      if (!t.startDate || !t.endDate) return;
+      if (!t.assigned || t.assigned.length === 0) return;
+
+      var taskStart = new Date(t.startDate + 'T00:00:00');
+      var taskEnd = new Date(t.endDate + 'T23:59:59');
+
+      if (taskEnd < monthStart || taskStart > monthEnd) return;
+
+      var iter = new Date(Math.max(taskStart.getTime(), monthStart.getTime()));
+      iter.setHours(0, 0, 0, 0);
+      var stop = new Date(Math.min(taskEnd.getTime(), monthEnd.getTime()));
+
+      var status = null;
+      for (var si = 0; si < statuses.length; si++) {
+        if (statuses[si].id === t.statusId) { status = statuses[si]; break; }
+      }
+      var isDone = t.statusId === doneId;
+
+      while (iter <= stop) {
+        var dow = iter.getDay();
+        if (dow !== 0) {
+          var key = formatDateKey(iter);
+          if (!map[key]) map[key] = [];
+          t.assigned.forEach(function(pid) {
+            var person = findPerson(pid);
+            if (!person) return;
+            var charp = isCharp(pid);
+            if (calFilter === 'charp' && !charp) return;
+            if (calFilter === 'sub' && charp) return;
+            map[key].push({
+              personId: pid, person: person,
+              projectId: proj.id, projectColor: proj.color,
+              projectCode: proj.code || proj.name, projectName: proj.name,
+              taskName: t.name, taskPhase: t.phase, taskId: t.id,
+              done: isDone, status: status, isCharp: charp
+            });
+          });
+        }
+        iter.setDate(iter.getDate() + 1);
+      }
+    });
+  });
+
+  Object.keys(map).forEach(function(key) {
+    var seen = {};
+    var uniq = [];
+    map[key].forEach(function(e) {
+      var k = e.personId + '|' + e.projectId + '|' + e.taskId;
+      if (!seen[k]) { seen[k] = true; uniq.push(e); }
+    });
+    uniq.sort(function(a, b) {
+      if (a.isCharp !== b.isCharp) return a.isCharp ? -1 : 1;
+      return getDisplayLabel(a.person, a.isCharp).localeCompare(getDisplayLabel(b.person, b.isCharp));
+    });
+    map[key] = uniq;
+  });
+
+  return map;
+}
+
+function renderProjectLegend() {
+  var wrap = $('projectLegend');
+  if (!wrap) return;
+  if (state.projects.length === 0) {
+    wrap.innerHTML = '<span style="color:var(--ink-3); font-style:italic;">Crée un projet pour voir tes affectations.</span>';
+    return;
+  }
+  wrap.innerHTML = state.projects.map(function(p) {
+    return '<div class="legend-item"><span class="legend-dot" style="background:' + p.color + '"></span><strong>' + escapeHtml(p.name) + '</strong> <span style="color:var(--ink-3); font-family:\'JetBrains Mono\',monospace; font-size:10px;">' + escapeHtml(p.code || '') + '</span></div>';
+  }).join('');
+}
+
+function renderMonthYearJump() {
+  var monthSel = $('monthJump');
+  var yearSel = $('yearJump');
+  if (!monthSel || !yearSel) return;
+
+  monthSel.innerHTML = '';
+  for (var m = 0; m < 12; m++) {
+    var o = document.createElement('option');
+    o.value = m;
+    o.textContent = MONTHS_FR[m].charAt(0).toUpperCase() + MONTHS_FR[m].slice(1);
+    if (m === calMonth.getMonth()) o.selected = true;
+    monthSel.appendChild(o);
+  }
+
+  var currentYear = calMonth.getFullYear();
+  var thisYear = new Date().getFullYear();
+  var startYear = Math.min(thisYear - 2, currentYear - 2);
+  var endYear = Math.max(thisYear + 10, currentYear + 5);
+  yearSel.innerHTML = '';
+  for (var y = startYear; y <= endYear; y++) {
+    var oy = document.createElement('option');
+    oy.value = y;
+    oy.textContent = y;
+    if (y === currentYear) oy.selected = true;
+    yearSel.appendChild(oy);
+  }
+}
+
+function renderCalendar() {
+  var monthLbl = $('monthLabel');
+  if (monthLbl) monthLbl.textContent = MONTHS_FR[calMonth.getMonth()] + ' ' + calMonth.getFullYear();
+
+  renderProjectLegend();
+  renderMonthYearJump();
+
+  var grid = $('calGrid');
+  if (!grid) return;
+
+  var assignments = buildMonthAssignments();
+  grid.innerHTML = '';
+
+  var year = calMonth.getFullYear();
+  var month = calMonth.getMonth();
+  var firstDay = new Date(year, month, 1);
+  var lastDay = new Date(year, month + 1, 0);
+  var today = new Date();
+
+  var startOffset = firstDay.getDay();
+  var totalDays = lastDay.getDate();
+  var totalCells = Math.ceil((startOffset + totalDays) / 7) * 7;
+
+  for (var i = 0; i < totalCells; i++) {
+    (function(idx) {
+      var dayDate = new Date(year, month, idx - startOffset + 1);
+      var isOutside = dayDate.getMonth() !== month;
+      var dow = dayDate.getDay();
+      var isWeekend = dow === 0 || dow === 6;
+      var isToday = isSameDay(dayDate, today);
+      var dateKey = formatDateKey(dayDate);
+      var entries = assignments[dateKey] || [];
+
+      var cell = document.createElement('div');
+      cell.className = 'cal-cell';
+      if (isOutside) cell.classList.add('outside');
+      if (isWeekend) cell.classList.add('weekend');
+      if (isToday) cell.classList.add('today');
+
+      var numEl = document.createElement('div');
+      numEl.className = 'cal-day-num';
+      numEl.textContent = dayDate.getDate();
+      cell.appendChild(numEl);
+
+      var entriesEl = document.createElement('div');
+      entriesEl.className = 'cal-day-entries';
+
+      var MAX_VISIBLE = 4;
+      var visible = entries.slice(0, MAX_VISIBLE);
+      var hidden = entries.length - visible.length;
+
+      visible.forEach(function(e) {
+        var ent = document.createElement('div');
+        ent.className = 'cal-entry' + (e.isCharp ? ' charp' : '') + (e.done ? ' done' : '');
+        ent.style.borderLeftColor = e.projectColor;
+        var label = e.isCharp ? shortName(e.person.name) : (e.person.company || e.person.name);
+        ent.title = getDisplayLabel(e.person, e.isCharp) + ' — ' + e.taskName + ' (' + e.projectName + ')';
+        ent.innerHTML = '<span class="entry-name">' + escapeHtml(label) + '</span>';
+        entriesEl.appendChild(ent);
+      });
+
+      if (hidden > 0) {
+        var more = document.createElement('div');
+        more.className = 'cal-more';
+        more.textContent = '+ ' + hidden + ' autre' + (hidden > 1 ? 's' : '');
+        entriesEl.appendChild(more);
+      }
+
+      cell.appendChild(entriesEl);
+      cell.addEventListener('click', function() { openDayDetail(dayDate, entries); });
+      grid.appendChild(cell);
+    })(i);
+  }
+}
+
+function openDayDetail(date, entries) {
+  var titleEl = $('dayModalTitle');
+  var body = $('dayModalBody');
+  if (!titleEl || !body) return;
+
+  var title = date.toLocaleDateString('fr-CA', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  titleEl.textContent = title.charAt(0).toUpperCase() + title.slice(1);
+
+  body.innerHTML = '';
+
+  if (entries.length === 0) {
+    body.innerHTML = '<div style="text-align:center; padding:30px 10px; color:var(--ink-3); font-style:italic;">Aucune affectation pour cette journée.</div>';
+    showModal('dayModal');
+    return;
+  }
+
+  var byProject = {};
+  var order = [];
+  entries.forEach(function(e) {
+    if (!byProject[e.projectId]) {
+      byProject[e.projectId] = { meta: e, list: [] };
+      order.push(e.projectId);
+    }
+    byProject[e.projectId].list.push(e);
+  });
+
+  order.forEach(function(pid) {
+    var grp = byProject[pid];
+    var section = document.createElement('div');
+    section.className = 'day-detail-section';
+
+    var h4 = document.createElement('h4');
+    h4.style.borderBottom = '2px solid ' + grp.meta.projectColor;
+    h4.style.color = 'var(--ink)';
+    h4.innerHTML = '<span class="legend-dot" style="background:' + grp.meta.projectColor + '; display:inline-block; vertical-align:middle; margin-right:8px;"></span>' + escapeHtml(grp.meta.projectName);
+    section.appendChild(h4);
+
+    grp.list.forEach(function(e) {
+      var row = document.createElement('div');
+      row.className = 'day-detail-entry';
+      if (e.done) row.style.opacity = '0.55';
+      var displayMain = e.isCharp ? e.person.name : (e.person.company || e.person.name);
+      var displaySub = e.isCharp ? '' : (e.person.name + ' · ');
+      var statusBadge = e.status ? '<span style="font-size:10px; background:' + e.status.color + '; color:#fff; padding:2px 7px; margin-left:6px; font-family:JetBrains Mono,monospace; letter-spacing:0.05em; font-weight:600; text-transform:uppercase;">' + escapeHtml(e.status.label) + '</span>' : '';
+      // Phase tag avec la couleur du projet
+      var proj = state.projects.filter(function(p) { return p.id === e.projectId; })[0];
+      var phaseObj = getPhaseById(e.taskPhase, proj);
+      var phaseTag = '<span style="display:inline-block; font-family:JetBrains Mono,monospace; font-size:9px; padding:2px 7px; color:#fff; font-weight:600; letter-spacing:0.05em; background:' + phaseObj.color + '; align-self:flex-start;">' + escapeHtml(phaseObj.label) + '</span>';
+      row.innerHTML =
+        phaseTag +
+        '<div class="dpe-info">' +
+          '<div class="dpe-name">' + escapeHtml(displayMain) + statusBadge + '</div>' +
+          '<div class="dpe-task">' + escapeHtml(displaySub) + escapeHtml(e.taskName) + ' · <span style="color:var(--ink-3); font-family:\'JetBrains Mono\',monospace; font-size:10px;">' + (e.isCharp ? 'Charpentier' : 'Sous-traitant') + '</span></div>' +
+        '</div>' +
+        '<button class="btn btn-sm btn-primary" data-call-detail="' + e.personId + '" type="button">📞</button>';
+      section.appendChild(row);
+    });
+
+    body.appendChild(section);
+  });
+
+  body.querySelectorAll('[data-call-detail]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var p = findPerson(btn.dataset.callDetail);
+      if (p) {
+        hideModal('dayModal');
+        setTimeout(function() { openCallSheet(p); }, 100);
+      }
+    });
+  });
+
+  showModal('dayModal');
+}
+
+// ============================================================
+// EXPORT CSV
+// ============================================================
+function exportCsv() {
+  var proj = getActiveProject();
+  if (!proj) { showToast('Aucun projet actif'); return; }
+
+  var rows = [['Projet', 'Section', 'Phase', 'Tâche', 'Début', 'Fin', 'Statut', 'Assignés (entreprise · personne)']];
+  var sectionMap = {};
+  (proj.sections || []).forEach(function(s) { sectionMap[s.id] = s.name; });
+
+  (proj.tasks || []).forEach(function(t) {
+    var status = getStatusById(t.statusId, proj);
+    var phase = getPhaseById(t.phase, proj);
+    var names = (t.assigned || []).map(function(pid) {
+      var p = findPerson(pid);
+      if (!p) return '?';
+      if (p.company) return p.company + ' · ' + p.name;
+      return p.name;
+    }).join(' / ');
+    rows.push([
+      proj.name,
+      t.sectionId ? (sectionMap[t.sectionId] || '—') : '—',
+      phase ? phase.label : (t.phase || '—'),
+      t.name,
+      t.startDate || '',
+      t.endDate || '',
+      status ? status.label : '—',
+      names
+    ]);
+  });
+
+  var csv = rows.map(function(r) {
+    return r.map(function(c) { return '"' + String(c).replace(/"/g, '""') + '"'; }).join(',');
+  }).join('\n');
+  var blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = 'suivi_' + proj.name.replace(/\s+/g, '_').toLowerCase() + '_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Export CSV téléchargé');
+}
+
+// ============================================================
+// PHASES MODAL
+// ============================================================
+var editingPhases = [];
+
+function openPhaseModal() {
+  if (!state.activeProjectId) { showToast('Crée d\'abord un projet'); return; }
+  editingPhases = JSON.parse(JSON.stringify(getProjectPhases()));
+  renderPhaseList();
+  showModal('phaseModal');
+}
+
+function renderPhaseList() {
+  var wrap = $('phaseList');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  editingPhases.forEach(function(ph, idx) {
+    var row = document.createElement('div');
+    row.className = 'status-row';
+
+    var colorInput = document.createElement('input');
+    colorInput.type = 'color';
+    colorInput.value = ph.color;
+    colorInput.addEventListener('change', function() {
+      editingPhases[idx].color = colorInput.value;
+    });
+    row.appendChild(colorInput);
+
+    var labelInput = document.createElement('input');
+    labelInput.type = 'text';
+    labelInput.value = ph.label;
+    labelInput.placeholder = 'Nom de la phase';
+    labelInput.addEventListener('input', function() {
+      editingPhases[idx].label = labelInput.value;
+    });
+    row.appendChild(labelInput);
+
+    var upBtn = document.createElement('button');
+    upBtn.type = 'button';
+    upBtn.className = 'btn btn-sm';
+    upBtn.textContent = '↑';
+    upBtn.disabled = idx === 0;
+    upBtn.addEventListener('click', function() {
+      if (idx > 0) {
+        moveItem(editingPhases, idx, idx - 1);
+        renderPhaseList();
+      }
+    });
+    row.appendChild(upBtn);
+
+    var downBtn = document.createElement('button');
+    downBtn.type = 'button';
+    downBtn.className = 'btn btn-sm';
+    downBtn.textContent = '↓';
+    downBtn.disabled = idx === editingPhases.length - 1;
+    downBtn.addEventListener('click', function() {
+      if (idx < editingPhases.length - 1) {
+        moveItem(editingPhases, idx, idx + 1);
+        renderPhaseList();
+      }
+    });
+    row.appendChild(downBtn);
+
+    var delBtn = document.createElement('button');
+    delBtn.type = 'button';
+    delBtn.className = 'btn btn-sm';
+    delBtn.textContent = '×';
+    delBtn.style.cssText = 'color:var(--crimson); border-color:var(--crimson);';
+    delBtn.disabled = editingPhases.length <= 1;
+    delBtn.addEventListener('click', function() {
+      if (editingPhases.length > 1) {
+        editingPhases.splice(idx, 1);
+        renderPhaseList();
+      }
+    });
+    row.appendChild(delBtn);
+
+    wrap.appendChild(row);
+  });
+}
+
+async function savePhases() {
+  var valid = editingPhases.filter(function(p) { return p.label && p.label.trim(); });
+  if (valid.length === 0) { showToast('Au moins une phase requise'); return; }
+  valid.forEach(function(p) {
+    if (!p.id) p.id = generateId('ph');
+  });
+  var proj = getActiveProject();
+  if (!proj) return;
+
+  // Réassigner les tâches qui ont une phase qui n'existe plus
+  var validIds = {};
+  valid.forEach(function(p) { validIds[p.id] = true; });
+  proj.tasks.forEach(function(t) {
+    if (!t.phase || !validIds[t.phase]) t.phase = valid[0].id;
+  });
+
+  proj.phases = valid;
+  await saveState();
+  hideModal('phaseModal');
+  showToast('Phases mises à jour');
+  renderTasks();
+  renderCalendar();
+}
+
+function addNewPhase() {
+  editingPhases.push({
+    id: generateId('ph'),
+    label: '',
+    color: '#8A8278'
+  });
+  renderPhaseList();
+}
+
+function resetPhasesEditing() {
+  if (!confirm('Restaurer les phases par défaut ?')) return;
+  editingPhases = JSON.parse(JSON.stringify(DEFAULT_PHASES));
+  renderPhaseList();
+}
+
+// ============================================================
+// SAUVEGARDE & RESTAURATION
+// ============================================================
+function openBackupModal() {
+  showModal('backupModal');
+}
+
+function doExportBackup() {
+  try {
+    var data = {
+      version: 'constructo_v6',
+      exportedAt: new Date().toISOString(),
+      projects: state.projects,
+      activeProjectId: state.activeProjectId,
+      charpentiers: state.charpentiers,
+      subs: state.subs
+    };
+    var json = JSON.stringify(data, null, 2);
+    var blob = new Blob([json], { type: 'application/json;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url;
+    var dateStr = new Date().toISOString().slice(0, 10);
+    a.download = 'constructo_sauvegarde_' + dateStr + '.json';
+    a.click();
+    setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+    showToast('Sauvegarde téléchargée');
+  } catch (e) {
+    console.error('Erreur export:', e);
+    showToast('Erreur lors de l\'export');
+  }
+}
+
+function doImportBackup() {
+  var input = $('importFile');
+  if (!input || !input.files || input.files.length === 0) {
+    showToast('Choisis d\'abord un fichier');
+    return;
+  }
+  var file = input.files[0];
+  if (!confirm('Importer ce fichier ? Toutes tes données actuelles seront remplacées.')) return;
+
+  var reader = new FileReader();
+  reader.onload = async function(e) {
+    try {
+      var data = JSON.parse(e.target.result);
+      if (!data || typeof data !== 'object') throw new Error('Fichier invalide');
+      if (!Array.isArray(data.projects)) throw new Error('Pas de projets dans le fichier');
+
+      state.projects = data.projects;
+      state.activeProjectId = data.activeProjectId || (data.projects[0] ? data.projects[0].id : null);
+      state.charpentiers = Array.isArray(data.charpentiers) ? data.charpentiers : [];
+      state.subs = Array.isArray(data.subs) ? data.subs : [];
+
+      // Validation des projets
+      state.projects.forEach(function(p) {
+        if (!Array.isArray(p.sections)) p.sections = [];
+        if (!Array.isArray(p.tasks)) p.tasks = [];
+        if (!Array.isArray(p.statuses) || p.statuses.length === 0) {
+          p.statuses = JSON.parse(JSON.stringify(DEFAULT_STATUSES));
+        }
+      });
+
+      await saveState();
+      hideModal('backupModal');
+      showToast('Données importées · ' + state.projects.length + ' projet(s)');
+      input.value = '';
+      renderAll();
+    } catch (err) {
+      console.error('Erreur import:', err);
+      showToast('Fichier invalide : ' + (err.message || 'erreur de lecture'));
+    }
+  };
+  reader.onerror = function() {
+    showToast('Erreur de lecture du fichier');
+  };
+  reader.readAsText(file);
+}
+
+// ============================================================
+// IMPRESSION PDF DU CALENDRIER
+// ============================================================
+function printCalendar() {
+  // On ouvre une fenêtre dédiée avec une version imprimable du calendrier
+  var assignments = buildMonthAssignments();
+  var year = calMonth.getFullYear();
+  var month = calMonth.getMonth();
+  var firstDay = new Date(year, month, 1);
+  var lastDay = new Date(year, month + 1, 0);
+  var startOffset = firstDay.getDay();
+  var totalDays = lastDay.getDate();
+  var totalCells = Math.ceil((startOffset + totalDays) / 7) * 7;
+  var monthLabel = MONTHS_FR[month] + ' ' + year;
+  var monthLabelCap = monthLabel.charAt(0).toUpperCase() + monthLabel.slice(1);
+
+  var legendHtml = state.projects.map(function(p) {
+    return '<div style="display:inline-flex; align-items:center; gap:6px; margin:0 12px 6px 0; font-size:11px;"><span style="display:inline-block; width:12px; height:12px; background:' + p.color + '; border-radius:2px;"></span><strong>' + escapeHtml(p.name) + '</strong></div>';
+  }).join('');
+
+  var cellsHtml = '';
+  for (var i = 0; i < totalCells; i++) {
+    var dayDate = new Date(year, month, i - startOffset + 1);
+    var isOutside = dayDate.getMonth() !== month;
+    var dow = dayDate.getDay();
+    var isWeekend = dow === 0 || dow === 6;
+    var dateKey = formatDateKey(dayDate);
+    var entries = assignments[dateKey] || [];
+
+    var bg = isOutside ? '#FAFAFA' : (isWeekend ? '#FFF8E8' : '#FFF');
+    var numColor = isOutside ? '#BBB' : '#000';
+
+    var entriesHtml = entries.map(function(e) {
+      var label = e.isCharp ? shortName(e.person.name) : (e.person.company || e.person.name);
+      var line = (e.done ? '<span style="text-decoration:line-through; opacity:0.5;">' : '<span>') + escapeHtml(label) + '</span>';
+      return '<div style="font-size:8px; line-height:1.2; padding:1px 3px; border-left:2px solid ' + e.projectColor + '; background:#F5F0E5; margin-bottom:1px; overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">' + line + '</div>';
+    }).join('');
+
+    cellsHtml += '<td style="border:1px solid #DDD; padding:3px; vertical-align:top; background:' + bg + '; height:90px; width:14.28%;">' +
+      '<div style="font-size:10px; font-weight:600; color:' + numColor + '; margin-bottom:2px;">' + dayDate.getDate() + '</div>' +
+      entriesHtml +
+      '</td>';
+
+    if ((i + 1) % 7 === 0 && i < totalCells - 1) cellsHtml += '</tr><tr>';
+  }
+
+  var html = '<!DOCTYPE html><html lang="fr-CA"><head><meta charset="UTF-8"><title>Calendrier ' + monthLabelCap + '</title>' +
+    '<style>' +
+    '@page { size: landscape; margin: 1cm; }' +
+    'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; padding: 0; margin: 0; color: #000; }' +
+    'h1 { font-size: 22px; margin: 0 0 4px; }' +
+    'h2 { font-size: 13px; margin: 0 0 12px; color: #666; font-weight: normal; }' +
+    'table { width: 100%; border-collapse: collapse; table-layout: fixed; }' +
+    'th { background: #1A1A1A; color: #FFF; padding: 6px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; border: 1px solid #1A1A1A; }' +
+    '.legend { margin-bottom: 10px; padding: 8px 10px; background: #F5F0E5; border: 1px solid #DDD; }' +
+    '.footer { margin-top: 12px; font-size: 9px; color: #888; text-align: right; }' +
+    '@media print { .noprint { display: none; } }' +
+    '.noprint { padding: 16px; background: #ECE5D8; text-align: center; border-bottom: 2px solid #1A1A1A; }' +
+    '.noprint button { padding: 10px 24px; font-size: 14px; background: #1A1A1A; color: #FFF; border: none; cursor: pointer; font-weight: 600; }' +
+    '</style>' +
+    '</head><body>' +
+    '<div class="noprint">' +
+    '<button onclick="window.print()">🖨 Imprimer / Sauvegarder en PDF</button>' +
+    '<div style="font-size:11px; color:#666; margin-top:8px;">Sur iPhone : touche le bouton ci-dessus, puis « Plus d\'options » → « Enregistrer en PDF » ou « Imprimer ».</div>' +
+    '</div>' +
+    '<div style="padding:16px;">' +
+    '<h1>Calendrier · ' + escapeHtml(monthLabelCap) + '</h1>' +
+    '<h2>Suivi multi-chantiers · Vue mensuelle</h2>' +
+    (legendHtml ? '<div class="legend">' + legendHtml + '</div>' : '') +
+    '<table>' +
+    '<thead><tr>' +
+    '<th>Dim</th><th>Lun</th><th>Mar</th><th>Mer</th><th>Jeu</th><th>Ven</th><th>Sam</th>' +
+    '</tr></thead>' +
+    '<tbody><tr>' + cellsHtml + '</tr></tbody>' +
+    '</table>' +
+    '<div class="footer">Généré le ' + new Date().toLocaleDateString('fr-CA', { day: 'numeric', month: 'long', year: 'numeric' }) + ' · Constructo</div>' +
+    '</div>' +
+    '</body></html>';
+
+  var w = window.open('', '_blank');
+  if (!w) {
+    showToast('Le navigateur a bloqué la fenêtre. Autorise les pop-ups pour imprimer.');
+    return;
+  }
+  w.document.open();
+  w.document.write(html);
+  w.document.close();
+  showToast('Fenêtre d\'impression ouverte');
+}
+
+async function resetTasks() {
+  var proj = getActiveProject();
+  if (!proj) return;
+  if (!confirm('Effacer toutes les tâches et sections de ce projet ?')) return;
+  proj.sections = [];
+  proj.tasks = [];
+  await saveState();
+  showToast('Projet vidé');
+  renderTasks();
+  renderStats();
+  renderCalendar();
+}
+
+// Charge le modèle pré-rempli dans le projet actif (vide ou non)
+async function loadTemplateIntoProject() {
+  var proj = getActiveProject();
+  if (!proj) { showToast('Aucun projet actif'); return; }
+  if ((proj.tasks && proj.tasks.length > 0) || (proj.sections && proj.sections.length > 0)) {
+    if (!confirm('Le projet contient déjà des données. Le modèle sera ajouté en plus. Continuer ?')) return;
+  }
+  if (!proj.startDate) {
+    if (!confirm('Le projet n\'a pas de date de début. Les tâches utiliseront aujourd\'hui comme référence. Continuer ?')) return;
+  }
+  var template = generateTemplateContent(proj.startDate);
+  if (!proj.sections) proj.sections = [];
+  if (!proj.tasks) proj.tasks = [];
+  proj.sections = proj.sections.concat(template.sections);
+  proj.tasks = proj.tasks.concat(template.tasks);
+  await saveState();
+  showToast('Modèle chargé · ' + template.tasks.length + ' tâches ajoutées');
+  renderTasks();
+  renderStats();
+  renderCalendar();
+}
+
+// ============================================================
+// RENDER ALL
+// ============================================================
+function renderAll() {
+  try {
+    renderProjectBar();
+    renderTasks();
+    renderStats();
+    renderCharpentiers();
+    renderSubs();
+    renderCalendar();
+  } catch (e) {
+    console.error('Erreur de rendu:', e);
+  }
+}
+
+// ============================================================
+// EVENT BINDINGS
+// ============================================================
+function safeBind(id, event, handler) {
+  var el = $(id);
+  if (el) el.addEventListener(event, handler);
+}
+
+function bindEvents() {
+  document.querySelectorAll('.tab').forEach(function(t) {
+    t.addEventListener('click', function() {
+      document.querySelectorAll('.tab').forEach(function(x) { x.classList.remove('active'); });
+      document.querySelectorAll('.panel').forEach(function(x) { x.classList.remove('active'); });
+      t.classList.add('active');
+      var panel = $('panel-' + t.dataset.tab);
+      if (panel) panel.classList.add('active');
+      if (t.dataset.tab === 'calendar') renderCalendar();
+    });
+  });
+
+  document.querySelectorAll('[data-close]').forEach(function(b) {
+    b.addEventListener('click', function() { hideModal(b.dataset.close); });
+  });
+
+  document.querySelectorAll('.modal-backdrop').forEach(function(bd) {
+    bd.addEventListener('click', function(e) {
+      if (e.target === bd) bd.classList.remove('show');
+    });
+  });
+
+  safeBind('projectSelect', 'change', async function(e) {
+    state.activeProjectId = e.target.value || null;
+    await saveState();
+    renderAll();
+  });
+
+  safeBind('btnAddProject', 'click', function() { openProjectModal(null); });
+  safeBind('btnEditProject', 'click', function() {
+    if (state.activeProjectId) openProjectModal(state.activeProjectId);
+    else showToast('Crée d\'abord un projet');
+  });
+  safeBind('projSave', 'click', saveProject);
+  safeBind('projDelete', 'click', deleteProject);
+
+  safeBind('btnAddTask', 'click', function() { openTaskModal(null); });
+  safeBind('btnAddSection', 'click', function() { openSectionModal(null); });
+  safeBind('btnLoadTemplate', 'click', loadTemplateIntoProject);
+  safeBind('taskSave', 'click', saveTask);
+  safeBind('taskDelete', 'click', deleteTaskFromModal);
+  safeBind('sectionSave', 'click', saveSection);
+  safeBind('sectionDelete', 'click', deleteSection);
+
+  safeBind('btnManageStatuses', 'click', openStatusModal);
+  safeBind('statusSave', 'click', saveStatuses);
+  safeBind('btnAddStatus', 'click', addNewStatus);
+  safeBind('btnResetStatuses', 'click', resetStatusesEditing);
+
+  safeBind('btnManagePhases', 'click', openPhaseModal);
+  safeBind('phaseSave', 'click', savePhases);
+  safeBind('btnAddPhase', 'click', addNewPhase);
+  safeBind('btnResetPhases', 'click', resetPhasesEditing);
+
+  safeBind('btnAddCharp', 'click', function() { openContactEdit('charp', null); });
+  safeBind('btnAddSub', 'click', function() { openContactEdit('sub', null); });
+  safeBind('contactSave', 'click', saveContactEdit);
+  safeBind('contactDelete', 'click', deleteContactEdit);
+
+  safeBind('btnExportCsv', 'click', exportCsv);
+  safeBind('btnBackup', 'click', openBackupModal);
+  safeBind('btnDoExport', 'click', doExportBackup);
+  safeBind('btnDoImport', 'click', doImportBackup);
+  safeBind('btnPrintCalendar', 'click', printCalendar);
+  safeBind('btnResetTasks', 'click', resetTasks);
+
+  safeBind('prevMonth', 'click', function() {
+    calMonth.setMonth(calMonth.getMonth() - 1);
+    renderCalendar();
+  });
+  safeBind('nextMonth', 'click', function() {
+    calMonth.setMonth(calMonth.getMonth() + 1);
+    renderCalendar();
+  });
+  safeBind('todayBtn', 'click', function() {
+    var t = new Date();
+    calMonth = new Date(t.getFullYear(), t.getMonth(), 1);
+    renderCalendar();
+  });
+  safeBind('monthJump', 'change', function(e) {
+    calMonth = new Date(calMonth.getFullYear(), parseInt(e.target.value, 10), 1);
+    renderCalendar();
+  });
+  safeBind('yearJump', 'change', function(e) {
+    calMonth = new Date(parseInt(e.target.value, 10), calMonth.getMonth(), 1);
+    renderCalendar();
+  });
+
+  document.querySelectorAll('[data-filter]').forEach(function(b) {
+    b.addEventListener('click', function() {
+      document.querySelectorAll('[data-filter]').forEach(function(x) { x.classList.remove('active'); });
+      b.classList.add('active');
+      calFilter = b.dataset.filter;
+      renderCalendar();
+    });
+  });
+
+  var td = $('todayDate');
+  if (td) {
+    td.textContent = new Date().toLocaleDateString('fr-CA', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+async function init() {
+  try {
+    await loadState();
+
+    var proj = getActiveProject();
+    if (proj && proj.startDate) {
+      calMonth = new Date(proj.startDate + 'T00:00:00');
+      calMonth.setDate(1);
+    } else {
+      var t = new Date();
+      calMonth = new Date(t.getFullYear(), t.getMonth(), 1);
+    }
+
+    bindEvents();
+    renderAll();
+    console.log('App initialisée. Projets:', state.projects.length);
+  } catch (err) {
+    console.error('Erreur init:', err);
+    var errBox = document.createElement('div');
+    errBox.style.cssText = 'padding:20px; max-width:600px; margin:60px auto; background:#FFF; border:2px solid #8B2635; font-family:sans-serif;';
+    errBox.innerHTML = '<h2 style="color:#8B2635; margin-bottom:10px;">Erreur de chargement</h2><pre style="background:#f5f5f5; padding:10px; overflow:auto; font-size:12px;">' + escapeHtml(err.message || String(err)) + '</pre>';
+    document.body.appendChild(errBox);
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', init);
+} else {
+  init();
+}
+</script>
+</body>
+</html>
